@@ -11,10 +11,10 @@ public class ThreadPoolConfig {
 
     @Bean
     public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
-        int processors = Runtime.getRuntime().availableProcessors();
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
-        threadPoolTaskExecutor.setCorePoolSize(processors);
-        threadPoolTaskExecutor.setMaxPoolSize(processors + 1);
+        // This is a network IO intensive application
+        threadPoolTaskExecutor.setCorePoolSize(100);
+        threadPoolTaskExecutor.setMaxPoolSize(100);
         threadPoolTaskExecutor.setKeepAliveSeconds(0);
         threadPoolTaskExecutor.setQueueCapacity(0);
         threadPoolTaskExecutor.setThreadNamePrefix("hero-thread-");
