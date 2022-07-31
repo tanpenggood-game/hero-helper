@@ -63,6 +63,8 @@ public enum WorldMapEnum {
     桃花涧_涧底("桃花涧_涧底", "上:桃花涧中央↑", 桃花山, routers(UP, RIGHT, UP, RIGHT, 3, DOWN)),
     水云洞深处("水云洞深处", "上:洞中小路↑", 桃花山, routers(UP, RIGHT, UP, RIGHT, 3, DOWN, RIGHT, DOWN, 2)),
     北大街("北大街", "活动大使", 上东京, routers(UP)),
+    东大街_老黄牛("东大街_老黄牛", "老黄牛", 上东京, routers(RIGHT, 2)),
+    沧州广场("沧州广场", "阵法大师", 上沧州, routers(RIGHT, 2)),
     沧州_草屋("沧州_草屋", "左:草料场←", 上沧州, routers(RIGHT, 9)),
     黄泥冈_小树林("黄泥冈_小树林", "上:泥土路↑", 黄泥冈, routers(RIGHT, DOWN)),
     景阳岗_树林("景阳岗_树林", "上:景阳岗上↑", 景阳岗, routers(UP, 4)),
