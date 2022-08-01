@@ -1,0 +1,23 @@
+spring:
+  profiles:
+    active: dev
+    include:
+      - npc-benefits
+      - npc-fixed
+      - npc-timed-refresh-80
+      - npc-timed-refresh-100
+      - npc-timed-refresh-120
+      - npc-timed-refresh-large
+
+hero:
+  region-users:
+    rp196a5mxbsypcpsm7u2t:
+      domain: 111.230.193.166
+      port: 1806
+      region: 6
+      role-name: Sam
+    2rt9b25mxxhr082e85vme6:
+      domain: 111.230.193.166
+      port: 1874
+      region: 74
+      role-name: Sam
