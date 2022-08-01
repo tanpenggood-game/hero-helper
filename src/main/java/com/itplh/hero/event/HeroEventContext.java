@@ -23,7 +23,15 @@ public class HeroEventContext {
      */
     private long successRunRound;
     /**
+     * 实际运行次数
+     */
+    private long actualRunRound;
+    /**
      * 额外的扩展信息
+     * <p>
+     * extendInfo includes parameter as follow:
+     * 1. mapping, used to specify the operation object
+     * 2. novice, used to identify novices
      */
     private Map<String, String> extendInfo;
 
