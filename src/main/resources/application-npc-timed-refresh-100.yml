@@ -1,0 +1,26 @@
+npc:
+  timed-refresh:
+    mapping:
+      mangrove:
+        operate-name: 刷柴家庄红树林
+        start-position: 柴家庄
+        refresh-frequency: 180
+        global-operation-objects:
+          - 红角巨兽
+          - 成年红角巨兽
+        actions:
+          - direction: RIGHT
+          - direction: RIGHT
+            has-callback: false
+          - direction: UP
+          - direction: RIGHT
+          - direction: RIGHT
+          - direction: RIGHT
+          - direction: DOWN
+          - direction: LEFT
+          - direction: LEFT
+          - direction: LEFT
+          - direction: DOWN
+          - direction: RIGHT
+          - direction: RIGHT
+          - direction: RIGHT

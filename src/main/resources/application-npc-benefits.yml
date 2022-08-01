@@ -1,0 +1,17 @@
+npc:
+  benefits:
+    mapping:
+      open-today-spiritual-cultivation:
+        operate-name: 开启今日修神
+        start-position: 练武场
+        global-operation-objects: 田武师
+        actions:
+          - operation-steps: 开启今日修神
+
+      exchange-online-time:
+        operate-name: 在线时间兑换
+        start-position: 北大街
+        global-operation-objects: 活动大使
+        actions:
+          - operation-steps: 在线时间x15兑换万虫羹x1
+          - operation-steps: 在线时间x30兑换高级万虫羹x1
