@@ -17,12 +17,12 @@ public class Action {
      */
     private boolean hasCallback = true;
     /**
-     * 是否补给粮草
+     * 动作次数
      * <p>
-     * 默认值为false，表示战斗前不进行粮草补给
-     * TODO 实现可配置化的粮草补给
+     * 默认值为1，表示不重复该动作
+     * repeatTimes = 2, 表示连续2次一样的动作
      */
-    private boolean isSupplyGrain = false;
+    private int repeatTimes = 1;
     /**
      * 操作对象
      */
