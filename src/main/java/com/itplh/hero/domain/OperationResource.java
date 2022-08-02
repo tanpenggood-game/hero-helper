@@ -6,10 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.IntStream;
 
 @Data
 @Slf4j
@@ -54,6 +52,10 @@ public class OperationResource {
      * 全局操作对象
      */
     private List<String> globalOperationObjects = Collections.EMPTY_LIST;
+    /**
+     * 全局操作步骤
+     */
+    private List<String> globalOperationSteps = Collections.EMPTY_LIST;
     /**
      * 行动路线
      */
@@ -104,5 +106,13 @@ public class OperationResource {
         return !isProtected(isNovice);
     }
 
-}
+    public List<Action> allActions() {
+        List<Action> allActions = new ArrayList<>();
+        for (Action action : actions) {
+            IntStream.range(0, action.getRepeatTimes())
+                    .forEach(n -> allActions.add(action));
+        }
+        return allActions;
+    }
 
+}
