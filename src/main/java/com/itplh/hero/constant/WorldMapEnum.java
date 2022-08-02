@@ -58,6 +58,7 @@ public enum WorldMapEnum {
     // ===================神行千里扩展地点===================
     练武场("练武场", "田武师", 我的庄院, routers(UP, RIGHT)),
     大柳树("大柳树", "进入树洞", 史家庄, routers(RIGHT, 2, UP, RIGHT, 2)),
+    流花河("流花河", "引诱出水龙", 桃花村, routers(RIGHT, 2, UP, RIGHT)),
     食人谷悬崖("食人谷悬崖", "巨蛇", 桃花村, routers(RIGHT, UP, 2, RIGHT)),
     桃花涧("桃花涧", "诱出蜂王", 桃花山, routers(UP, RIGHT, UP, RIGHT, 2)),
     桃花涧_涧底("桃花涧_涧底", "上:桃花涧中央↑", 桃花山, routers(UP, RIGHT, UP, RIGHT, 3, DOWN)),
