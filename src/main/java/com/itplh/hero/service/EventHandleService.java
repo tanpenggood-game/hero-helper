@@ -2,20 +2,18 @@ package com.itplh.hero.service;
 
 import com.itplh.hero.domain.OperationResource;
 import com.itplh.hero.event.AbstractEvent;
-import org.jsoup.nodes.Document;
 
-import java.util.Map;
-import java.util.Optional;
+import java.util.Collection;
 
 public interface EventHandleService {
 
-    Optional<Document> handle(AbstractEvent event, OperationResource operationResource);
-
     /**
      * @param event
-     * @param operationResourceMap
+     * @param executableResources must executable resources, in other words,
+     *                            these resources don't waiting for resource refresh {@link OperationResource#isWaitingForResourceRefresh()}
+     *                            and them are unprotected {@link OperationResource#isProtected(boolean)}
      * @return
      */
-    boolean handle(AbstractEvent event, Map<String, OperationResource> operationResourceMap);
+    boolean handle(AbstractEvent event, Collection<OperationResource> executableResources);
 
 }

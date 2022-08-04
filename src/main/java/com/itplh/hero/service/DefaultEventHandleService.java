@@ -1,15 +1,20 @@
 package com.itplh.hero.service;
 
+import com.itplh.hero.constant.ParameterEnum;
 import com.itplh.hero.domain.Action;
 import com.itplh.hero.domain.OperationResource;
 import com.itplh.hero.event.AbstractEvent;
+import com.itplh.hero.event.HeroEventContext;
 import com.itplh.hero.event.core.NPCFixedEvent;
+import com.itplh.hero.listener.EventBus;
+import com.itplh.hero.util.CollectionUtil;
+import com.itplh.hero.util.GameUtil;
 import com.itplh.hero.util.MoveUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -27,105 +32,148 @@ import static com.itplh.hero.util.RequestUtil.sleepThenGETRequest;
 @Service
 public class DefaultEventHandleService implements EventHandleService {
 
-    @Override
-    public Optional<Document> handle(AbstractEvent event, OperationResource operationResource) {
-        // check is waiting for resource refresh
-        if (operationResource.isWaitingForResourceRefresh()) {
-            waitingResourceLogIfNecessary(event, operationResource);
-            return Optional.empty();
-        }
-        // set last run time
-        operationResource.setLastRunTime(LocalDateTime.now());
-
-        // 1. request uri
-        Document document = sleepThenGETRequest(event.eventContext().buildURI(),
-                "start " + operationResource.getOperateName());
-        // 2. revise to target position
-        document = go1000m(document, operationResource.getStartPosition()).orElse(null);
-        // 3. execute action
-        boolean isFixedResource = operationResource.isFixedResource();
-        List<String> globalOperationObjects = operationResource.getGlobalOperationObjects();
-        for (Action action : operationResource.getActions()) {
-            // request move 1 step, if necessary
-            if (Optional.ofNullable(action.getDirection()).isPresent()) {
-                document = MoveUtil.move(document, action.getDirection()).orElse(null);
-            }
-            // execute action callback
-            document = executeActionCallback(document, action, globalOperationObjects, isFixedResource);
-            // return empty, if document is null
-            if (Objects.isNull(document)) {
-                String sid = event.eventContext().getSid();
-                String eventName = event.eventContext().getEventName();
-                log.warn("terminate operation [document=null] [sid={}] [eventName={}] [operateName={}] [action={}]",
-                        sid, eventName, operationResource.getOperateName(), action);
-                return Optional.empty();
-            }
-        }
-        // 4. return game main page
-        return requestReturnGameMainPage(document);
-    }
+    @Autowired
+    private EventBus eventBus;
 
     @Override
-    public boolean handle(AbstractEvent event, Map<String, OperationResource> operationResourceMap) {
-        if (CollectionUtils.isEmpty(operationResourceMap)) {
-            return true;
+    public boolean handle(AbstractEvent event, Collection<OperationResource> executableResources) {
+        if (Objects.isNull(event) || CollectionUtils.isEmpty(executableResources)) {
+            return false;
         }
-        // select operable resources
-        Collection<OperationResource> operableResources = selectOperableResources(event, operationResourceMap);
         // execute operate
-        boolean unfixedResource = !Objects.equals(event.eventContext().getEventName(), NPCFixedEvent.class.getSimpleName());
-        List<Boolean> successCounter = operableResources.stream()
-                .map(operationResource -> {
+        boolean isNotFixedResource = !Objects.equals(event.eventContext().getEventName(), NPCFixedEvent.class.getSimpleName());
+        List<Boolean> successCounter = executableResources.stream()
+                .map(operableResource -> {
                     String sid = event.eventContext().getSid();
                     String eventName = event.eventContext().getEventName();
-                    String operateName = operationResource.getOperateName();
-                    if (unfixedResource) {
+                    String operateName = operableResource.getOperateName();
+                    long start = System.currentTimeMillis();
+                    if (isNotFixedResource) {
                         log.debug("start [sid={}] [event={}] [operation={}]", sid, eventName, operateName);
                     }
-                    boolean isSuccess = handle(event, operationResource).isPresent();
-                    if (unfixedResource) {
-                        log.debug("finish [sid={}] [event={}] [operation={}] [isSuccess={}]", sid, eventName, operateName, isSuccess);
+                    boolean isSuccess = handle(event, operableResource).isPresent();
+                    if (isNotFixedResource) {
+                        long costSeconds = (System.currentTimeMillis() - start) / 1000;
+                        log.debug("finish [sid={}] [event={}] [operation={}] [costSeconds={}] [isSuccess={}]",
+                                sid, eventName, operateName, costSeconds, isSuccess);
                     }
                     return isSuccess;
                 })
                 .filter(Boolean::booleanValue)
                 .collect(Collectors.toList());
-        return successCounter.size() == operableResources.size();
+        return successCounter.size() == executableResources.size();
+    }
+
+    private Optional<Document> handle(AbstractEvent event, OperationResource executableResource) {
+        String sid = event.eventContext().getSid();
+        String eventName = event.eventContext().getEventName();
+        String operateName = executableResource.getOperateName();
+        // if this event already closed
+        if (eventBus.isClosedEvent(sid)) {
+            log.info("event is closed [sid={}] [eventName={}] [operateName={}]", sid, eventName, operateName);
+            return Optional.empty();
+        }
+        // if this event already pause
+        if (eventBus.isPauseEvent(sid)) {
+            log.info("event is paused [sid={}] [eventName={}] [operateName={}]", sid, eventName, operateName);
+            return Optional.empty();
+        }
+        // set start run time
+        executableResource.setLastRunTime(LocalDateTime.now());
+        // 1. request uri
+        Document document = sleepThenGETRequest(event.eventContext().buildURI(),
+                "start " + executableResource.getOperateName());
+        // 2. revise to target position
+        document = go1000m(document, executableResource.getStartPosition()).orElse(null);
+        // supply grain if necessary
+        document = supplyGrainIfNecessary(event, document);
+        // set run time, second times ensure start run time more accuracy
+        executableResource.setLastRunTime(LocalDateTime.now());
+        // 3. execute action
+        document = executeActions(document, event, executableResource);
+        // 4. return game main page
+        return requestReturnGameMainPage(document);
+    }
+
+    private Document executeActions(Document document,
+                                    AbstractEvent event,
+                                    OperationResource executableResource) {
+        String sid = event.eventContext().getSid();
+        String eventName = event.eventContext().getEventName();
+        String operateName = executableResource.getOperateName();
+        for (Action action : executableResource.allActions()) {
+            // if this event already close
+            if (eventBus.isClosedEvent(sid)) {
+                log.info("event is closed [sid={}] [eventName={}] [operateName={}] [action={}]", sid, eventName, operateName, action);
+                break;
+            }
+            // if this event already pause
+            if (eventBus.isPauseEvent(sid)) {
+                log.info("event is paused [sid={}] [eventName={}] [operateName={}] [action={}]", sid, eventName, operateName, action);
+                break;
+            }
+            // request move 1 step, if necessary
+            if (Optional.ofNullable(action.getDirection()).isPresent()) {
+                document = MoveUtil.move(document, action.getDirection()).orElse(null);
+            }
+            // execute action callback
+            document = executeActionCallback(document, action, executableResource, event);
+            // return empty, if document is null
+            if (Objects.isNull(document)) {
+                log.warn("terminate [document=null] [sid={}] [eventName={}] [operateName={}] [action={}]",
+                        sid, eventName, operateName, action);
+                break;
+            }
+        }
+        return document;
     }
 
     private Document executeActionCallback(Document document,
                                            Action action,
-                                           Collection<String> globalOperationObjects,
-                                           boolean isFixedResource) {
+                                           OperationResource executableResource,
+                                           AbstractEvent event) {
         if (!action.isHasCallback() || Objects.isNull(document)) {
             return document;
         }
         // if first is battle page
-        document = requestAutoBattle(document).orElse(null);
+        if (GameUtil.isBattlePage(document)) {
+            document = requestAutoBattle(document).orElse(null);
+        }
         // action handle, includes operation objects and steps
-        Set<String> operationObjects = new HashSet<>();
-        operationObjects.addAll(globalOperationObjects);
-        operationObjects.addAll(action.getOperationObjects());
-        return actionHandler(document, action, operationObjects, isFixedResource);
+        return actionCallbackHandler(document, action, executableResource, event);
     }
 
-    private Document actionHandler(Document document,
-                                   Action action,
-                                   Collection<String> operationObjects,
-                                   boolean isFixedResource) {
+    private Document actionCallbackHandler(Document document,
+                                           Action action,
+                                           OperationResource executableResource,
+                                           AbstractEvent event) {
+        Collection<String> operationObjects = CollectionUtil.merge(executableResource.getGlobalOperationObjects(), action.getOperationObjects());
+        Collection<String> operationSteps = CollectionUtil.merge(executableResource.getGlobalOperationSteps(), action.getOperationSteps());
         while (queryURIByLinkName(document, operationObjects).isPresent()) {
             // request operation object
             document = requestByLinkName(document, operationObjects, getLog(operationObjects)).orElse(null);
+            int operateTimes = 0;
             // operation steps, if exists
-            for (String step : action.getOperationSteps()) {
+            for (String step : operationSteps) {
                 if (queryURIByLinkName(document, step).isPresent()) {
+                    ++operateTimes;
                     document = requestByLinkName(document, step, getLog(Arrays.asList(step))).orElse(null);
                 }
             }
             // attack operation object, if necessary
-            document = requestAutoBattle(document).orElse(null);
-            // only operation once and return game main page, if fixed resource
-            if (isFixedResource) {
+            if (GameUtil.isBattlePage(document)) {
+                ++operateTimes;
+                document = requestAutoBattle(document).orElse(null);
+            }
+            // break loop, if operate 0 times
+            if (operateTimes == 0) {
+                HeroEventContext eventContext = event.eventContext();
+                log.warn("operate 0 times [sid={}] [event={}] [operation={}] [operationObjects={}]",
+                        eventContext.getSid(), eventContext.getEventName(), executableResource.getOperateName(), operationObjects);
+                break;
+            }
+            // only operate once and break loop, if fixed resource
+            if (executableResource.isFixedResource()) {
                 document = requestReturnGameMainPage(document).orElse(null);
                 break;
             }
@@ -133,68 +181,14 @@ public class DefaultEventHandleService implements EventHandleService {
         return document;
     }
 
-    /**
-     * select operable resources
-     * <p>
-     * extendInfo includes parameter as follow:
-     * 1. mapping, used to specify the operation object
-     * 2. novice, used to identify novices
-     *
-     * @param event
-     * @param operationResourceMap
-     * @return
-     */
-    private Collection<OperationResource> selectOperableResources(AbstractEvent event, Map<String, OperationResource> operationResourceMap) {
-        Collection<OperationResource> operationResourceList;
-        Map<String, String> extendInfo = event.eventContext().getExtendInfo();
-        Optional<String> mapping = Optional.ofNullable(extendInfo.get("mapping"));
-        Optional<String> novice = Optional.ofNullable(extendInfo.get("novice"));
-        if (mapping.isPresent()) {
-            // select user input part
-            operationResourceList = Arrays.asList(mapping.get().split(","))
-                    .stream()
-                    .filter(e -> !StringUtils.isEmpty(e))
-                    .map(e -> operationResourceMap.get(e))
-                    // exclude null
-                    .filter(resource -> Optional.ofNullable(resource).isPresent())
-                    .collect(Collectors.toList());
-        } else {
-            // auto select all
-            operationResourceList = operationResourceMap.values();
+    private Document supplyGrainIfNecessary(AbstractEvent event, Document document) {
+        boolean isSupplyGrain = event.eventContext().queryExtendInfo(ParameterEnum.SUPPLY_GRAIN)
+                .map(Boolean::valueOf)
+                .orElse(false);
+        if (isSupplyGrain) {
+            document = GameUtil.requestSupplyGrain(document).orElse(null);
         }
-
-        // only select first, if event equals npc fixed event
-        if (event instanceof NPCFixedEvent) {
-            operationResourceList = operationResourceList.stream()
-                    .findFirst()
-                    .map(Arrays::asList)
-                    .orElse(Collections.EMPTY_LIST);
-        }
-
-        boolean isNovice = novice.map(Boolean::valueOf).orElse(false);
-        return operationResourceList.stream()
-                // exclude be protected resource
-                .filter(operationResource -> operationResource.isUnprotected(isNovice))
-                // exclude waiting for refresh
-                .filter(operationResource -> {
-                    waitingResourceLogIfNecessary(event, operationResource);
-                    return !operationResource.isWaitingForResourceRefresh();
-                })
-                // sort by priority desc
-                .sorted(Comparator.comparing(OperationResource::getPriority).reversed())
-                .collect(Collectors.toList());
-    }
-
-    private void waitingResourceLogIfNecessary(AbstractEvent event, OperationResource operationResource) {
-        if (operationResource.isWaitingForResourceRefresh()) {
-            String sid = event.eventContext().getSid();
-            String eventName = event.eventContext().getEventName();
-            String operateName = operationResource.getOperateName();
-            long refreshFrequency = operationResource.getRefreshFrequency();
-            LocalDateTime lastRunTime = operationResource.getLastRunTime();
-            log.debug("waiting for resource refresh [sid={}] [event={}] [operation={}] [last run time={}] [refresh frequency={}] ",
-                    sid, eventName, operateName, lastRunTime, refreshFrequency);
-        }
+        return document;
     }
 
 }
