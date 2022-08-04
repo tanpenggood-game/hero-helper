@@ -66,7 +66,7 @@ public class OperationResource {
     private LocalDateTime lastRunTime;
 
     public boolean isFixedResource() {
-        return refreshFrequency == 0L && limit == -1;
+        return refreshFrequency <= 0L && limit == -1;
     }
 
     /**
@@ -81,8 +81,7 @@ public class OperationResource {
         if (isFixedResource() || Objects.isNull(lastRunTime)) {
             return false;
         }
-        return Optional.ofNullable(lastRunTime)
-                .map(lastRunTime -> lastRunTime.plusSeconds(refreshFrequency))
+        return Optional.ofNullable(nextRunTime())
                 .map(nextRunTime -> {
                     ZoneOffset zoneOffset = ZoneOffset.ofHours(8);
                     long nextRunTimeStamp = nextRunTime.toEpochSecond(zoneOffset);
@@ -93,6 +92,20 @@ public class OperationResource {
     }
 
     /**
+     * 下一次可运行时间
+     *
+     * @return
+     */
+    public LocalDateTime nextRunTime() {
+        LocalDateTime nextRunTime = LocalDateTime.now();
+        if (isFixedResource() || Objects.isNull(lastRunTime)) {
+            return nextRunTime;
+        }
+        nextRunTime = lastRunTime.plusSeconds(refreshFrequency);
+        return nextRunTime;
+    }
+
+    /**
      * will be protected if enabled novice protection and role is novice.
      *
      * @param isNovice
@@ -100,10 +113,6 @@ public class OperationResource {
      */
     public boolean isProtected(boolean isNovice) {
         return enableNoviceProtection && isNovice;
-    }
-
-    public boolean isUnprotected(boolean isNovice) {
-        return !isProtected(isNovice);
     }
 
     public List<Action> allActions() {
