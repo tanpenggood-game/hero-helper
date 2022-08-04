@@ -1,0 +1,274 @@
+npc:
+  timed-refresh:
+    mapping:
+      boss1-liuhua-river:
+        operate-name: 攻击流花河鱼鹰
+        start-position: 流花河
+        # 流花河鱼鹰 60 minutes
+        refresh-frequency: 3600
+        priority: 60
+        actions:
+          - direction: RIGHT
+            operation-objects: 进入河中巨石
+          - operation-objects: 流花河鱼鹰
+            operation-steps: 攻击流花河鱼鹰
+
+      boss2-liuhua-river:
+        operate-name: 攻击流花河巨兽
+        start-position: 流花河
+        # 流花河巨兽 80 minutes
+        refresh-frequency: 4800
+        priority: 80
+        actions:
+          - direction: RIGHT
+            operation-objects: 进入河中巨石
+          - direction: UP
+            operation-objects: 流花河巨兽
+            operation-steps: 攻击流花河巨兽
+
+      boss1-mangrove:
+        operate-name: 攻击红角兽王
+        start-position: 冰魄洞
+        # 30 minutes
+        refresh-frequency: 1800
+        priority: 30
+        global-operation-objects: 红角兽王
+        actions:
+          - direction: DOWN
+            operation-steps: 攻击红角兽王
+
+      boss2-mangrove:
+        operate-name: 攻击红树林飞贼
+        start-position: 柴家庄
+        # 90 minutes
+        refresh-frequency: 5400
+        priority: 90
+        global-operation-objects: 红树林飞贼
+        actions:
+          - direction: RIGHT
+            has-callback: false
+            repeat-times: 3
+          - direction: DOWN
+            has-callback: false
+          - direction: DOWN
+            operation-steps: 攻击红树林飞贼
+
+      boss-mangrove:
+        operate-name: 攻击红树林飞贼头领
+        start-position: 柴家庄
+        # 120 minutes
+        refresh-frequency: 7200
+        priority: 120
+        global-operation-objects: 红树林飞贼头领
+        actions:
+          - direction: RIGHT
+            has-callback: false
+            repeat-times: 3
+          - direction: UP
+            has-callback: false
+          - direction: UP
+            operation-steps: 攻击红树林飞贼头领
+
+      boss1-huangnigang:
+        operate-name: 攻击劫镖大当家
+        start-position: 黄泥冈_小树林
+        # 30 minutes
+        refresh-frequency: 1800
+        priority: 30
+        global-operation-objects: 劫镖大当家
+        actions:
+          - direction: DOWN
+            has-callback: false
+            repeat-times: 3
+          - direction: DOWN
+            operation-steps: 攻击劫镖大当家
+
+      boss2-huangnigang:
+        operate-name: 攻击驾风神道
+        start-position: 黄泥冈_小树林
+        # 90 minutes
+        refresh-frequency: 5400
+        priority: 90
+        global-operation-objects: 驾风神道
+        actions:
+          - direction: DOWN
+            has-callback: false
+            repeat-times: 2
+          - direction: LEFT
+            has-callback: false
+          - direction: LEFT
+            operation-steps: 攻击驾风神道
+
+      boss3-huangnigang:
+        operate-name: 攻击观景神僧
+        start-position: 黄泥冈_小树林
+        # 120 minutes
+        refresh-frequency: 7200
+        priority: 120
+        global-operation-objects: 观景神僧
+        actions:
+          - direction: DOWN
+            has-callback: false
+          - direction: RIGHT
+            has-callback: false
+            repeat-times: 2
+          - direction: RIGHT
+            operation-steps: 攻击观景神僧
+
+      boss1-jingyanggang:
+        operate-name: 攻击追风盗神
+        start-position: 景阳岗_树林
+        # 90 minutes
+        refresh-frequency: 5400
+        priority: 90
+        global-operation-objects: 追风盗神
+        actions:
+          - direction: LEFT
+            has-callback: false
+            repeat-times: 2
+          - direction: DOWN
+            operation-steps: 攻击追风盗神
+
+      boss2-jingyanggang:
+        operate-name: 攻击摘星子
+        start-position: 景阳岗_树林
+        # 120 minutes
+        refresh-frequency: 7200
+        priority: 120
+        global-operation-objects: 摘星子
+        actions:
+          - direction: RIGHT
+            has-callback: false
+            repeat-times: 3
+          - direction: DOWN
+            operation-steps: 攻击摘星子
+
+      boss-tianzihui-tian:
+        operate-name: 攻击天字老大
+        start-position: 天字会
+        # 135 minutes
+        refresh-frequency: 8100
+        priority: 135
+        global-operation-objects: 天字老大
+        global-operation-steps: 攻击天字老大
+        actions:
+          - direction: DOWN
+            has-callback: false
+          - direction: RIGHT
+            has-callback: false
+            repeat-times: 3
+          - direction: DOWN
+
+      boss-tianzihui-di:
+        operate-name: 攻击地字老大
+        start-position: 天字会
+        # 120 minutes
+        refresh-frequency: 7200
+        priority: 120
+        global-operation-objects: 地字老大
+        global-operation-steps: 攻击地字老大
+        actions:
+          - direction: DOWN
+            has-callback: false
+          - direction: RIGHT
+            has-callback: false
+          - direction: DOWN
+
+      boss-tianzihui-ren:
+        operate-name: 攻击人字老大
+        start-position: 天字会
+        # 90 minutes
+        refresh-frequency: 5400
+        priority: 90
+        global-operation-objects: 人字老大
+        global-operation-steps: 攻击人字老大
+        actions:
+          - direction: DOWN
+            has-callback: false
+          - direction: LEFT
+            has-callback: false
+          - direction: DOWN
+
+      boss-tianzihui-he:
+        operate-name: 攻击和字老大
+        start-position: 天字会
+        # 90 minutes
+        refresh-frequency: 5400
+        priority: 90
+        global-operation-objects: 和字老大
+        global-operation-steps: 攻击和字老大
+        actions:
+          - direction: DOWN
+            has-callback: false
+          - direction: LEFT
+            has-callback: false
+            repeat-times: 3
+          - direction: DOWN
+
+      boss-tomb-soul-9:
+        operate-name: 攻击墓魂之九
+        start-position: 千年古墓
+        # 20 minutes
+        refresh-frequency: 1200
+        priority: 20
+        actions:
+          - operation-objects: 守墓老人
+            operation-steps: 传送至古墓九层(900两)
+          - direction: UP
+            has-callback: false
+            repeat-times: 2
+          - direction: RIGHT
+            has-callback: false
+          - direction: RIGHT
+            operation-objects: 墓魂之九
+
+      boss-beast-mountain-9:
+        operate-name: 攻击人形象王
+        start-position: 百兽山岭
+        # 20 minutes
+        refresh-frequency: 1200
+        priority: 20
+        actions:
+          - operation-objects: 百兽老人
+            operation-steps: 传送至百兽岭九层(900两)
+          - direction: UP
+            has-callback: false
+            repeat-times: 2
+          - direction: RIGHT
+            has-callback: false
+          - direction: RIGHT
+            operation-objects: 人形象王
+
+      boss-crazy-thief-valley-9:
+        operate-name: 攻击狂盗谷大当家
+        start-position: 狂盗山谷
+        # 20 minutes
+        refresh-frequency: 1200
+        priority: 20
+        actions:
+          - operation-objects: 狂盗老人
+            operation-steps: 传送至狂盗谷九层(900两)
+          - direction: UP
+            has-callback: false
+            repeat-times: 2
+          - direction: RIGHT
+            has-callback: false
+          - direction: RIGHT
+            operation-objects: 狂盗谷大当家
+
+      boss-sword-soul-9:
+        operate-name: 攻击剑魂之九
+        start-position: 万剑宝塔
+        # 20 minutes
+        refresh-frequency: 1200
+        priority: 20
+        actions:
+          - operation-objects: 守剑老人
+            operation-steps: 传送至万剑塔九层(900两)
+          - direction: UP
+            has-callback: false
+            repeat-times: 2
+          - direction: RIGHT
+            has-callback: false
+          - direction: RIGHT
+            operation-objects: 剑魂之九
