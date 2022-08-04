@@ -1,110 +1,52 @@
 npc:
   timed-refresh:
     mapping:
-      green-bamboo-forest:
-        operate-name: 刷绿竹林
-        start-position: 绿竹林
+      group-green-bamboo-forest:
+        operate-name: 攻击绿竹林
+        start-position: 幽暗池
         refresh-frequency: 180
         enable-novice-protection: true
         global-operation-objects:
           - 蟒蛇
           - 大蟒蛇
+        global-operation-steps:
+          - 攻击蟒蛇
+          - 攻击大蟒蛇
         actions:
-          - operation-steps:
-              - 攻击蟒蛇
-              - 攻击大蟒蛇
+          - direction: LEFT
+          - direction: LEFT
+          - direction: UP
           - direction: RIGHT
+          - direction: LEFT
             has-callback: false
           - direction: UP
             has-callback: false
+          - direction: LEFT
           - direction: RIGHT
+          - direction: RIGHT
+          - direction: LEFT
             has-callback: false
           - direction: UP
-            operation-steps:
-              - 攻击蟒蛇
-              - 攻击大蟒蛇
-          - direction: DOWN
-            operation-steps:
-              - 攻击蟒蛇
-              - 攻击大蟒蛇
-          - direction: LEFT
-            operation-steps:
-              - 攻击蟒蛇
-              - 攻击大蟒蛇
-          - direction: DOWN
-            operation-steps:
-              - 攻击蟒蛇
-              - 攻击大蟒蛇
           - direction: RIGHT
-            operation-steps:
-              - 攻击蟒蛇
-              - 攻击大蟒蛇
-          - direction: LEFT
-            has-callback: false
-          - direction: DOWN
-            operation-steps:
-              - 攻击蟒蛇
-              - 攻击大蟒蛇
-          - direction: RIGHT
-            operation-steps:
-              - 攻击蟒蛇
-              - 攻击大蟒蛇
-          - direction: LEFT
-            has-callback: false
-          - direction: DOWN
-            operation-steps:
-              - 攻击蟒蛇
-              - 攻击大蟒蛇
-          - direction: RIGHT
-            operation-steps:
-              - 攻击蟒蛇
-              - 攻击大蟒蛇
+          - direction: UP
 
-      dark-pool:
-        operate-name: 刷幽暗池
+      group-dark-pool:
+        operate-name: 攻击幽暗池
         start-position: 幽暗池
         refresh-frequency: 180
         enable-novice-protection: true
+        global-operation-objects:
+          - 光电鱼
+          - 光电虾
+        global-operation-steps:
+          - 攻击光电鱼
+          - 攻击光电虾
         actions:
           - direction: DOWN
-            operation-objects: 光电鱼
-            operation-steps: 攻击光电鱼
           - direction: LEFT
-            operation-objects: 光电鱼
-            operation-steps: 攻击光电鱼
           - direction: DOWN
-            operation-objects: 光电虾
-            operation-steps: 攻击光电虾
           - direction: RIGHT
-            operation-objects: 光电虾
-            operation-steps: 攻击光电虾
-          - direction: RIGHT
-            operation-objects: 光电虾
-            operation-steps: 攻击光电虾
-          - direction: RIGHT
-            operation-objects: 光电虾
-            operation-steps: 攻击光电虾
-          - direction: RIGHT
-            operation-objects: 光电虾
-            operation-steps: 攻击光电虾
-          - direction: RIGHT
-            operation-objects: 光电虾
-            operation-steps: 攻击光电虾
-          - direction: RIGHT
-            operation-objects: 光电虾
-            operation-steps: 攻击光电虾
+            repeat-times: 6
           - direction: UP
-            operation-objects: 光电鱼
-            operation-steps: 攻击光电鱼
           - direction: LEFT
-            operation-objects: 光电鱼
-            operation-steps: 攻击光电鱼
-          - direction: LEFT
-            operation-objects: 光电鱼
-            operation-steps: 攻击光电鱼
-          - direction: LEFT
-            operation-objects: 光电鱼
-            operation-steps: 攻击光电鱼
-          - direction: LEFT
-            operation-objects: 光电鱼
-            operation-steps: 攻击光电鱼
+            repeat-times: 4

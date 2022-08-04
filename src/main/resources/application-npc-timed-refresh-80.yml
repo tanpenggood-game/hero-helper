@@ -1,3 +1,77 @@
 npc:
   timed-refresh:
     mapping:
+      group-liuhua-river:
+        operate-name: 攻击流花河
+        start-position: 流花河
+        refresh-frequency: 180
+        global-operation-objects:
+          - 流花鱼
+          - 流花兽
+        global-operation-steps:
+          - 攻击流花鱼
+          - 攻击流花兽
+        actions:
+          - direction: RIGHT
+          - direction: DOWN
+            repeat-times: 3
+          - direction: RIGHT
+            repeat-times: 3
+          - direction: UP
+            repeat-times: 6
+          - direction: LEFT
+            repeat-times: 3
+          - direction: DOWN
+            repeat-times: 2
+
+      group-taohua-zhen:
+        operate-name: 攻击桃花阵
+        start-position: 桃花山
+        refresh-frequency: 180
+        global-operation-objects: 杀人蜂
+        actions:
+          - direction: UP
+            has-callback: false
+          - direction: LEFT
+            has-callback: false
+          - direction: UP
+          - direction: DOWN
+          - direction: RIGHT
+            repeat-times: 3
+          - direction: LEFT
+            has-callback: false
+          - direction: UP
+          - direction: UP
+          - direction: DOWN
+            has-callback: false
+          - direction: RIGHT
+          - direction: LEFT
+            has-callback: false
+          - direction: LEFT
+          - direction: UP
+
+      queen-bee:
+        operate-name: 攻击蜂王
+        start-position: 桃花涧
+        # 30 minutes
+        refresh-frequency: 1800
+        priority: -1
+        actions:
+          - operation-objects: 诱出蜂王
+
+      large-old-tortoise:
+        operate-name: 攻击巨大老龟
+        start-position: 桃花涧_涧底
+        refresh-frequency: 180
+        actions:
+          - operation-objects: 巨大老龟
+            operation-steps: 攻击巨大老龟
+
+      evil-dragon:
+        operate-name: 攻击邪龙
+        start-position: 水云洞深处
+        # 30 minutes
+        refresh-frequency: 1800
+        actions:
+          - operation-objects: 邪龙
+            operation-steps: 攻击邪龙

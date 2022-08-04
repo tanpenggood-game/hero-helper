@@ -1,0 +1,46 @@
+npc:
+  timed-refresh:
+    mapping:
+      group-willow-forest:
+        operate-name: 攻击柳树林
+        start-position: 史家庄
+        refresh-frequency: 180
+        global-operation-objects:
+          - 柳虫
+          - 大柳虫
+        actions:
+          - direction: RIGHT
+            has-callback: false
+            repeat-times: 3
+          - direction: RIGHT
+          - direction: LEFT
+          - direction: DOWN
+          - direction: UP
+            has-callback: false
+          - direction: LEFT
+          - direction: UP
+          - direction: RIGHT
+          - direction: LEFT
+            has-callback: false
+          - direction: DOWN
+            has-callback: false
+          - direction: LEFT
+            has-callback: false
+          - direction: UP
+            has-callback: false
+          - direction: UP
+          - direction: DOWN
+            repeat-times: 4
+
+      giant-green-snake:
+        operate-name: 攻击巨大青蛇
+        start-position: 大柳树
+        # 20 minutes
+        refresh-frequency: 1200
+        priority: 20
+        actions:
+          - operation-objects: 进入树洞
+            operation-steps:
+              - 继续
+              - 巨大青蛇
+              - 攻击巨大青蛇

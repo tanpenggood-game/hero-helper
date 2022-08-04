@@ -1,41 +1,41 @@
 npc:
   fixed:
     mapping:
-      green-snack:
+      fixed-green-snack:
         operate-name: 攻击青蛇
         start-position: 大柳树
         actions:
           - operation-objects: 青蛇
             operation-steps: 攻击青蛇
 
-      old-ox:
+      fixed-old-ox:
         operate-name: 攻击老黄牛
         start-position: 东大街_老黄牛
         actions:
           - operation-objects: 老黄牛
             operation-steps: 攻击老黄牛
 
-      treasure-house-guard:
+      fixed-treasure-house-guard:
         operate-name: 攻击宝库守卫
         start-position: 太尉宝库
         actions:
           - operation-objects: 宝库守卫
             operation-steps: 攻击宝库守卫
 
-      attack-python:
+      fixed-attack-python:
         operate-name: 攻击巨蛇
         start-position: 食人谷悬崖
         actions:
           - operation-objects: 巨蛇
             operation-steps: 攻击巨蛇
 
-      cangzhou-pull-house:
+      fixed-cangzhou-pull-house:
         operate-name: 牵汗血宝马
         start-position: 沧州_草屋
         refresh-frequency: 10
         global-operation-objects: 牵走汗血宝马
 
-      exchange-resources-100-50:
+      fixed-exchange-resources-100-50:
         operate-name: 潜能转资源(100:50)
         start-position: 寒玉狮前厅
         global-operation-objects: 灵隐和尚
@@ -53,7 +53,7 @@ npc:
               - 潜能转资源(100:50)
               - 4潜能转化为石料(1000万:500万)
 
-      exchange-resources-100-100:
+      fixed-exchange-resources-100-100:
         operate-name: 潜能转资源(100:100)
         start-position: 寒玉狮前厅
         global-operation-objects: 灵隐和尚

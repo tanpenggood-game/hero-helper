@@ -1,13 +1,14 @@
 spring:
   profiles:
-    active: dev
+    active: test
     include:
       - npc-benefits
       - npc-fixed
+      - npc-timed-refresh-50
       - npc-timed-refresh-80
       - npc-timed-refresh-100
       - npc-timed-refresh-120
-      - npc-timed-refresh-large
+      - npc-timed-refresh-boss
 
 hero:
   region-users:
