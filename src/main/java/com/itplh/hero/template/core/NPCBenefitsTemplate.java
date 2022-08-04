@@ -4,7 +4,6 @@ import com.itplh.hero.domain.OperationResource;
 import com.itplh.hero.event.AbstractEvent;
 import com.itplh.hero.event.core.NPCBenefitsEvent;
 import com.itplh.hero.template.HeroTemplate;
-import com.itplh.hero.util.CollectionUtil;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -20,7 +19,7 @@ public class NPCBenefitsTemplate implements HeroTemplate {
 
     @Override
     public Map<String, OperationResource> getOperationResourceTemplate() {
-        return CollectionUtil.deepCopy(mapping);
+        return mapping;
     }
 
     @Override

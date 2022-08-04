@@ -37,26 +37,39 @@ public class EventTemplateUtil {
         return eventMapping.containsKey(eventName);
     }
 
+    public static Optional<Class<? extends AbstractEvent>> getEventClass(String eventName) {
+        return Optional.ofNullable(eventMapping.get(eventName));
+    }
+
     public static Optional<AbstractEvent> getEventInstance(String eventName, HeroEventContext heroEventContext) {
         Optional<AbstractEvent> instanceOptional = Optional.empty();
-        try {
-            Class<? extends AbstractEvent> event = eventMapping.get(eventName);
-            Constructor<? extends AbstractEvent> constructor = event.getDeclaredConstructor(HeroEventContext.class);
-            AbstractEvent instance = constructor.newInstance(heroEventContext);
-            instanceOptional = Optional.ofNullable(instance);
-        } catch (Throwable e) {
-            log.error(e.getMessage(), e);
+        Optional<Class<? extends AbstractEvent>> classOptional = getEventClass(eventName);
+        if (classOptional.isPresent()) {
+            try {
+                Class<? extends AbstractEvent> event = classOptional.get();
+                Constructor<? extends AbstractEvent> constructor = event.getDeclaredConstructor(HeroEventContext.class);
+                AbstractEvent instance = constructor.newInstance(heroEventContext);
+                instanceOptional = Optional.ofNullable(instance);
+            } catch (Throwable e) {
+                log.error(e.getMessage(), e);
+            }
         }
         return instanceOptional;
     }
 
-    public static Map<String, OperationResource> getOperationResourceTemplate(Class<? extends AbstractEvent> clazz) {
+    /**
+     * 复制该事件所对应的所有操作资源
+     *
+     * @param clazz
+     * @return
+     */
+    public static Map<String, OperationResource> copyOperationResourceTemplate(Class<? extends AbstractEvent> clazz) {
         if (Objects.isNull(clazz)) {
             return null;
         }
         Class<? extends HeroTemplate> templateClass = eventTemplateMapping.get(clazz);
         HeroTemplate template = BeanUtil.getBean(templateClass);
-        return template.getOperationResourceTemplate();
+        return CollectionUtil.deepCopy(template.getOperationResourceTemplate());
     }
 
 }
