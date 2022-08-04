@@ -3,6 +3,7 @@ package com.itplh.hero.util;
 import com.itplh.hero.constant.WorldMapEnum;
 import org.jsoup.nodes.Document;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.itplh.hero.util.ElementUtil.queryURIByLinkName;
@@ -35,6 +36,9 @@ public class Go1000mUtil {
      * @return
      */
     public static Optional<Document> go1000m(Document document, WorldMapEnum target) {
+        if (Objects.isNull(target)) {
+            return Optional.ofNullable(document);
+        }
         // return game main page
         document = requestReturnGameMainPage(document).orElse(null);
         // check is extend
