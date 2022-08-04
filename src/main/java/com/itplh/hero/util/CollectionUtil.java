@@ -4,9 +4,7 @@ import com.itplh.hero.domain.OperationResource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class CollectionUtil {
 
@@ -33,6 +31,14 @@ public class CollectionUtil {
             newMap.put(k, newValue);
         });
         return newMap;
+    }
+
+    public static <E> Collection<E> merge(Collection<E>... collection) {
+        List<E> result = new ArrayList<>();
+        for (Collection c : collection) {
+            result.addAll(c);
+        }
+        return result;
     }
 
 }
