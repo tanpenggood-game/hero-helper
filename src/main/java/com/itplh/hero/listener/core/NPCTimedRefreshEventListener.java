@@ -19,7 +19,7 @@ public class NPCTimedRefreshEventListener implements ApplicationListener<NPCTime
     @Override
     public void onApplicationEvent(NPCTimedRefreshEvent event) {
         applicationListenerHelper.doOnApplicationEvent(event,
-                operationResourceMap -> eventHandleService.handle(event, operationResourceMap));
+                executableResources -> eventHandleService.handle(event, executableResources));
     }
 
 }

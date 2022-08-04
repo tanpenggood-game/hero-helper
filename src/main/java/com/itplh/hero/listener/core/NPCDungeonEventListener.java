@@ -19,7 +19,7 @@ public class NPCDungeonEventListener implements ApplicationListener<NPCDungeonEv
     @Override
     public void onApplicationEvent(NPCDungeonEvent event) {
         applicationListenerHelper.doOnApplicationEvent(event,
-                operationResourceMap -> eventHandleService.handle(event, operationResourceMap));
+                executableResources -> eventHandleService.handle(event, executableResources));
     }
 
 }

@@ -19,7 +19,7 @@ public class NPCFixedEventListener implements ApplicationListener<NPCFixedEvent>
     @Override
     public void onApplicationEvent(NPCFixedEvent event) {
         applicationListenerHelper.doOnApplicationEvent(event,
-                operationResourceMap -> eventHandleService.handle(event, operationResourceMap));
+                executableResources -> eventHandleService.handle(event, executableResources));
     }
 
 }

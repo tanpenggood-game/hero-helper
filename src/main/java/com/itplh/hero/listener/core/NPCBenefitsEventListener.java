@@ -21,7 +21,7 @@ public class NPCBenefitsEventListener implements ApplicationListener<NPCBenefits
     @Override
     public void onApplicationEvent(NPCBenefitsEvent event) {
         applicationListenerHelper.doOnApplicationEvent(event,
-                operationResourceMap -> eventHandleService.handle(event, operationResourceMap));
+                executableResources -> eventHandleService.handle(event, executableResources));
     }
 
 }
