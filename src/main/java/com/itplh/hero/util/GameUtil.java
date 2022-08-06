@@ -112,7 +112,7 @@ public class GameUtil {
      * @return
      */
     public static boolean isBattlePage(Document document) {
-        return ElementUtil.queryURIByLinkName(document, "控制").isPresent();
+        return ElementUtil.queryURIByLinkName(document, "快捷键设置").isPresent();
     }
 
     /**
