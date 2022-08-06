@@ -1,8 +1,6 @@
 package com.itplh.hero.util;
 
-import com.itplh.hero.component.BeanUtil;
-import com.itplh.hero.domain.HeroRegionUser;
-import com.itplh.hero.properties.HeroRegionUserProperties;
+import com.itplh.hero.context.HeroRegionUserContext;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
@@ -19,19 +17,12 @@ public class RequestUtil {
 
     private static final int SLEEP_MILLISECONDS = 600;
     private static HashMap<String, String> headers = new HashMap<>();
-    /**
-     * key sid
-     */
-    private static Map<String, HeroRegionUser> regionUsers;
 
     static {
         headers.put("Accept-Language", "zh-CN,zh;q=0.9");
         headers.put("Cache-Control", "max-age-0");
         headers.put("Connection", "keep-alive");
         headers.put("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36");
-
-        HeroRegionUserProperties heroRegionUserProperties = BeanUtil.getBean(HeroRegionUserProperties.class);
-        regionUsers = Objects.isNull(heroRegionUserProperties) ? Collections.EMPTY_MAP : heroRegionUserProperties.getRegionUsers();
     }
 
     /**
@@ -162,13 +153,12 @@ public class RequestUtil {
         private RequestHelper(String uri, String operateLog) {
             this.URI = uri;
             this.operateLog = operateLog;
-            Optional.ofNullable(regionUsers)
-                    .map(e -> e.get(parseSid(uri)))
-                    .ifPresent(heroRegionUser -> {
-                        this.scheme = heroRegionUser.getScheme();
-                        this.domain = heroRegionUser.getDomain();
-                        this.port = heroRegionUser.getPort();
-                    });
+
+            HeroRegionUserContext.get(parseSid(uri)).ifPresent(heroRegionUser -> {
+                this.scheme = heroRegionUser.getScheme();
+                this.domain = heroRegionUser.getDomain();
+                this.port = heroRegionUser.getPort();
+            });
         }
 
         public static RequestHelper get(String uri, String operateLog) {

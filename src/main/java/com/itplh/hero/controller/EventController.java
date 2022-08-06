@@ -1,10 +1,11 @@
 package com.itplh.hero.controller;
 
 import com.itplh.hero.constant.ParameterEnum;
+import com.itplh.hero.context.HeroRegionUserContext;
+import com.itplh.hero.domain.HeroRegionUser;
 import com.itplh.hero.event.HeroEventContext;
 import com.itplh.hero.event.core.NPCFixedEvent;
 import com.itplh.hero.listener.EventBus;
-import com.itplh.hero.properties.HeroRegionUserProperties;
 import com.itplh.hero.util.EventTemplateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,19 +26,17 @@ public class EventController {
     @Autowired
     private EventBus eventBus;
 
-    @Autowired
-    private HeroRegionUserProperties heroRegionUserProperties;
-
     @PostMapping("/trigger")
     public Result eventTrigger(@RequestParam(required = true) String eventName,
                                @RequestParam(required = false) String sid,
                                @RequestParam(required = false, defaultValue = "1") Long targetRunRound,
                                @RequestBody Map<String, String> extendInfo) {
+        sid = setDefaultSidIfAbsent(sid);
+
         Result validate = validate(eventName, sid, extendInfo);
         if (!validate.isSuccess()) {
             return validate;
         }
-        sid = setDefaultSidIfAbsent(sid);
 
         log.info("start trigger [sid={}] [eventName={}]", sid, eventName);
         HeroEventContext heroEventContext = HeroEventContext.newInstance(sid, eventName, targetRunRound, extendInfo);
@@ -115,13 +114,10 @@ public class EventController {
 
     private String setDefaultSidIfAbsent(String sid) {
         if (StringUtils.isEmpty(sid)) {
-            String firstSid = Optional.ofNullable(heroRegionUserProperties.getRegionUsers())
-                    .flatMap(roles -> roles.keySet().stream().findFirst())
-                    .orElse(null);
-            if (StringUtils.isEmpty(firstSid)) {
-                throw new RuntimeException("Don't found suitable sid");
+            Optional<HeroRegionUser> first = HeroRegionUserContext.getFirst();
+            if (first.isPresent()) {
+                sid = first.get().getSid();
             }
-            return firstSid;
         }
         return sid;
     }
@@ -129,10 +125,8 @@ public class EventController {
     private Result validate(String eventName,
                             String sid,
                             Map<String, String> extendInfo) {
-        if (StringUtils.hasText(sid)) {
-            if (!heroRegionUserProperties.getRegionUsers().keySet().contains(sid)) {
-                return Result.error("sid 参数异常");
-            }
+        if (!HeroRegionUserContext.contains(sid)) {
+            return Result.error("未设置合适的角色");
         }
         if (StringUtils.isEmpty(eventName)) {
             return Result.error("eventName 参数为空");
