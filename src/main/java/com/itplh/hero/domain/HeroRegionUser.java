@@ -1,5 +1,6 @@
 package com.itplh.hero.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
@@ -16,6 +17,7 @@ public class HeroRegionUser {
     /**
      * 账号密码
      */
+    @JsonIgnore
     private String password;
     /**
      * 网络协议
@@ -38,10 +40,7 @@ public class HeroRegionUser {
      * 角色名称
      */
     private String roleName;
-    /**
-     * 新手标识
-     * 默认值为false，表示非新手
-     */
-    private boolean novice;
+
+    private long timestamp = System.currentTimeMillis();
 
 }
