@@ -202,15 +202,14 @@ public class DefaultApplicationListenerHelper implements ApplicationListenerHelp
     private boolean isEnterSleep(AbstractEvent event,
                                  Map<String, OperationResource> operableResources) {
         String sid = event.eventContext().getSid();
-        String eventName = event.eventContext().getEventName();
         long targetRunRound = event.eventContext().getTargetRunRound();
         long actualRunRound = event.eventContext().getActualRunRound();
         if (targetRunRound == -1) {
-            return Objects.equals(eventName, NPCTimedRefreshEvent.class.getSimpleName())
+            return event.isNeedSleep()
                     && eventBus.isRunningEvent(sid)
                     && realTimeComputingSleepSeconds(event, operableResources) > 0;
         }
-        return Objects.equals(eventName, NPCTimedRefreshEvent.class.getSimpleName())
+        return event.isNeedSleep()
                 && eventBus.isRunningEvent(sid)
                 && targetRunRound > actualRunRound
                 && realTimeComputingSleepSeconds(event, operableResources) > 0;
