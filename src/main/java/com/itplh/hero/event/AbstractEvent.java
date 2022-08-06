@@ -12,4 +12,13 @@ public abstract class AbstractEvent extends ApplicationEvent {
         return ((HeroEventContext) super.getSource());
     }
 
+    /**
+     * used to waiting for resource in each round.
+     *
+     * @return return true, this event meet sleep conditions; return false, needn't sleep.
+     */
+    public boolean isNeedSleep() {
+        return false;
+    }
+
 }

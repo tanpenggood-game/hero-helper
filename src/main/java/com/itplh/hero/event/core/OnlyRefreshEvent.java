@@ -12,4 +12,14 @@ public class OnlyRefreshEvent extends AbstractEvent {
         super(source);
     }
 
+    @Override
+    public boolean isNeedSleep() {
+        return true;
+    }
+
+    public static OnlyRefreshEvent refreshOnce(String sid) {
+        HeroEventContext eventContext = new HeroEventContext(sid, OnlyRefreshEvent.class.getSimpleName(), 1, null);
+        return new OnlyRefreshEvent(eventContext);
+    }
+
 }

@@ -12,4 +12,9 @@ public class NPCTimedRefreshEvent extends AbstractEvent {
         super(source);
     }
 
+    @Override
+    public boolean isNeedSleep() {
+        return true;
+    }
+
 }
