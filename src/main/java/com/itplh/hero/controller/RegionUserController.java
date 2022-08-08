@@ -30,6 +30,9 @@ public class RegionUserController {
         if (StringUtils.isEmpty(sid)) {
             return Result.error("sid is required.");
         }
+        if (eventBus.containsEvent(sid)) {
+            return Result.error("please close related event.");
+        }
         // close event
         eventBus.close(sid);
         // delete user
