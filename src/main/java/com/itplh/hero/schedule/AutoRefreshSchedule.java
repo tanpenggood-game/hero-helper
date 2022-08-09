@@ -18,7 +18,7 @@ public class AutoRefreshSchedule {
     @Scheduled(cron = "0 0/10 * * * ? ")
     public void refresh() {
         HeroRegionUserContext.getAll().forEach(user -> {
-            if (!eventBus.isRunningEvent(user.getSid())) {
+            if (!eventBus.containsEvent(user.getSid())) {
                 eventBus.publishEvent(OnlyRefreshEvent.refreshOnce(user.getSid()));
             }
         });
