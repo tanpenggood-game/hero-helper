@@ -1,12 +1,14 @@
 package com.itplh.hero.util;
 
 import com.itplh.hero.context.HeroRegionUserContext;
+import com.itplh.hero.domain.HeroRegionUser;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -151,10 +153,13 @@ public class RequestUtil {
         private String operateLog;
 
         private RequestHelper(String uri, String operateLog) {
+            Assert.hasText(uri, "uri is required.");
+            Optional<HeroRegionUser> regionUserOptional = HeroRegionUserContext.get(parseSid(uri));
+            Assert.isTrue(regionUserOptional.isPresent(), "sid is invalid.");
+
             this.URI = uri;
             this.operateLog = operateLog;
-
-            HeroRegionUserContext.get(parseSid(uri)).ifPresent(heroRegionUser -> {
+            regionUserOptional.ifPresent(heroRegionUser -> {
                 this.scheme = heroRegionUser.getScheme();
                 this.domain = heroRegionUser.getDomain();
                 this.port = heroRegionUser.getPort();
