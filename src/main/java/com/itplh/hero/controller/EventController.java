@@ -3,6 +3,7 @@ package com.itplh.hero.controller;
 import com.itplh.hero.constant.ParameterEnum;
 import com.itplh.hero.context.HeroRegionUserContext;
 import com.itplh.hero.domain.HeroRegionUser;
+import com.itplh.hero.domain.SimpleUser;
 import com.itplh.hero.event.HeroEventContext;
 import com.itplh.hero.event.core.NPCFixedEvent;
 import com.itplh.hero.listener.EventBus;
@@ -39,7 +40,8 @@ public class EventController {
         }
 
         log.info("start trigger [sid={}] [eventName={}]", sid, eventName);
-        HeroEventContext heroEventContext = HeroEventContext.newInstance(sid, eventName, targetRunRound, extendInfo);
+        SimpleUser user = HeroRegionUserContext.get(sid).get().simpleUser();
+        HeroEventContext heroEventContext = HeroEventContext.newInstance(user, eventName, targetRunRound, extendInfo);
         boolean isSuccess = EventTemplateUtil.getEventInstance(eventName, heroEventContext)
                 .map(event -> eventBus.publishEvent(event))
                 .orElse(false);
@@ -126,13 +128,13 @@ public class EventController {
                             String sid,
                             Map<String, String> extendInfo) {
         if (!HeroRegionUserContext.contains(sid)) {
-            return Result.error("未设置合适的角色");
+            return Result.error("sid is invalid.");
         }
         if (StringUtils.isEmpty(eventName)) {
-            return Result.error("eventName 参数为空");
+            return Result.error("eventName is required.");
         }
         if (!EventTemplateUtil.hasEventInstance(eventName)) {
-            return Result.error("eventName 参数异常");
+            return Result.error("eventName is invalid.");
         }
         if (Objects.equals(eventName, NPCFixedEvent.class.getSimpleName())) {
             String resource = ParameterEnum.RESOURCE.getName();
@@ -146,7 +148,7 @@ public class EventController {
     private int operateAll(String operateLog, Function<String, Boolean> function) {
         int[] successCounter = {0};
         eventBus.getAllEvent().stream()
-                .map(event -> event.eventContext().getSid())
+                .map(event -> event.eventContext().getUser().getSid())
                 .forEach(sid -> {
                     boolean isSuccess = function.apply(sid);
                     if (isSuccess) {

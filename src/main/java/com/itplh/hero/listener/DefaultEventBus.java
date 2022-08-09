@@ -31,7 +31,7 @@ public class DefaultEventBus implements EventBus {
 
     @Override
     public boolean publishEvent(AbstractEvent event) {
-        return asyncPublishEvent(event.eventContext().getSid(), event);
+        return asyncPublishEvent(event.eventContext().getUser().getSid(), event);
     }
 
     @Override

@@ -19,7 +19,11 @@ public class RegionUserController {
 
     @PostMapping("/save")
     public Result save(@RequestBody HeroRegionUser regionUser) {
-        if (Objects.isNull(regionUser) || StringUtils.isEmpty(regionUser.getSid())) {
+        if (Objects.isNull(regionUser)
+                || StringUtils.isEmpty(regionUser.getSid())
+                || StringUtils.isEmpty(regionUser.getDomain())
+                || StringUtils.isEmpty(regionUser.getPort())
+        ) {
             return Result.error("表单数据异常");
         }
         return Result.ok(HeroRegionUserContext.save(regionUser));

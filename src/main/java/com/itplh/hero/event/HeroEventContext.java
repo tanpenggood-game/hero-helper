@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.itplh.hero.constant.EventStatusEnum;
 import com.itplh.hero.constant.ParameterEnum;
 import com.itplh.hero.domain.OperationResourceSnapshot;
+import com.itplh.hero.domain.SimpleUser;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -17,7 +19,7 @@ import java.util.Optional;
 @Accessors(chain = true)
 public class HeroEventContext {
 
-    private String sid;
+    private SimpleUser user;
     /**
      * 事件名称
      */
@@ -59,15 +61,18 @@ public class HeroEventContext {
     @JsonIgnore
     private Map<String, OperationResourceSnapshot> operationSnapshotMap;
 
-    public HeroEventContext(String sid, String eventName, long targetRunRound, Map<String, String> extendInfo) {
-        this.sid = sid;
+    public HeroEventContext(SimpleUser user, String eventName, long targetRunRound, Map<String, String> extendInfo) {
+        Assert.notNull(user, "user is required.");
+        Assert.hasText(eventName, "eventName is required.");
+
+        this.user = user;
         this.eventName = eventName;
         this.targetRunRound = targetRunRound;
         this.extendInfo = CollectionUtils.isEmpty(extendInfo) ? Collections.EMPTY_MAP : extendInfo;
     }
 
-    public static HeroEventContext newInstance(String sid, String eventName, long targetRunRound, Map<String, String> extendInfo) {
-        return new HeroEventContext(sid, eventName, targetRunRound, extendInfo);
+    public static HeroEventContext newInstance(SimpleUser user, String eventName, long targetRunRound, Map<String, String> extendInfo) {
+        return new HeroEventContext(user, eventName, targetRunRound, extendInfo);
     }
 
     public String buildURI(String sid) {
@@ -75,7 +80,7 @@ public class HeroEventContext {
     }
 
     public String buildURI() {
-        return buildURI(sid);
+        return buildURI(user.getSid());
     }
 
     public Optional<String> queryExtendInfo(ParameterEnum parameter) {

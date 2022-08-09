@@ -1,5 +1,7 @@
 package com.itplh.hero.event.core;
 
+import com.itplh.hero.context.HeroRegionUserContext;
+import com.itplh.hero.domain.SimpleUser;
 import com.itplh.hero.event.AbstractEvent;
 import com.itplh.hero.event.HeroEventContext;
 
@@ -18,8 +20,12 @@ public class OnlyRefreshEvent extends AbstractEvent {
     }
 
     public static OnlyRefreshEvent refreshOnce(String sid) {
-        HeroEventContext eventContext = new HeroEventContext(sid, OnlyRefreshEvent.class.getSimpleName(), 1, null);
-        return new OnlyRefreshEvent(eventContext);
+        if (HeroRegionUserContext.contains(sid)) {
+            SimpleUser user = HeroRegionUserContext.get(sid).get().simpleUser();
+            HeroEventContext eventContext = new HeroEventContext(user, OnlyRefreshEvent.class.getSimpleName(), 1, null);
+            return new OnlyRefreshEvent(eventContext);
+        }
+        return null;
     }
 
 }

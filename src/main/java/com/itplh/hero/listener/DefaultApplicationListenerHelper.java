@@ -32,7 +32,8 @@ public class DefaultApplicationListenerHelper implements ApplicationListenerHelp
     public void doOnApplicationEvent(AbstractEvent event,
                                      Function<Collection<OperationResource>, Boolean> doBusiness) {
         HeroEventContext heroEventContext = event.eventContext();
-        if (!eventBus.containsEvent(heroEventContext.getSid())) {
+        String sid = heroEventContext.getUser().getSid();
+        if (!eventBus.containsEvent(sid)) {
             return;
         }
 
@@ -43,7 +44,6 @@ public class DefaultApplicationListenerHelper implements ApplicationListenerHelp
         // replay snapshot
         SnapshotUtil.replaySnapshot(event, operableResources);
 
-        String sid = heroEventContext.getSid();
         String eventName = heroEventContext.getEventName();
         log.info("start [event={}] [sid={}]", eventName, sid);
 
@@ -95,7 +95,7 @@ public class DefaultApplicationListenerHelper implements ApplicationListenerHelp
                                         long start) {
         try {
             long costSeconds = (System.currentTimeMillis() - start) / 1000;
-            String sid = event.eventContext().getSid();
+            String sid = event.eventContext().getUser().getSid();
             String eventName = event.eventContext().getEventName();
             long actualRunRound = event.eventContext().getActualRunRound();
             boolean isEnterSleep = isEnterSleep(event, operableResources);
@@ -189,7 +189,7 @@ public class DefaultApplicationListenerHelper implements ApplicationListenerHelp
     private void printLogForNextExecuteResource(AbstractEvent event,
                                                 Collection<OperationResource> executableResources) {
         for (OperationResource executableResource : executableResources) {
-            String sid = event.eventContext().getSid();
+            String sid = event.eventContext().getUser().getSid();
             String eventName = event.eventContext().getEventName();
             String operateName = executableResource.getOperateName();
             long refreshFrequency = executableResource.getRefreshFrequency();
@@ -201,7 +201,7 @@ public class DefaultApplicationListenerHelper implements ApplicationListenerHelp
 
     private boolean isEnterSleep(AbstractEvent event,
                                  Map<String, OperationResource> operableResources) {
-        String sid = event.eventContext().getSid();
+        String sid = event.eventContext().getUser().getSid();
         long targetRunRound = event.eventContext().getTargetRunRound();
         long actualRunRound = event.eventContext().getActualRunRound();
         if (targetRunRound == -1) {

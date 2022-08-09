@@ -43,4 +43,15 @@ public class HeroRegionUser {
 
     private long timestamp = System.currentTimeMillis();
 
+
+    public SimpleUser simpleUser() {
+        SimpleUser simpleUser = new SimpleUser();
+        simpleUser.setSid(sid);
+        simpleUser.setDomain(domain);
+        simpleUser.setPort(port);
+        simpleUser.setRegion(region);
+        simpleUser.setRoleName(roleName);
+        return simpleUser;
+    }
+
 }

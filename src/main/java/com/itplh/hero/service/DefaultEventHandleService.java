@@ -44,7 +44,7 @@ public class DefaultEventHandleService implements EventHandleService {
         boolean isNotFixedResource = !Objects.equals(event.eventContext().getEventName(), NPCFixedEvent.class.getSimpleName());
         List<Boolean> successCounter = executableResources.stream()
                 .map(operableResource -> {
-                    String sid = event.eventContext().getSid();
+                    String sid = event.eventContext().getUser().getSid();
                     String eventName = event.eventContext().getEventName();
                     String operateName = operableResource.getOperateName();
                     long start = System.currentTimeMillis();
@@ -65,7 +65,7 @@ public class DefaultEventHandleService implements EventHandleService {
     }
 
     private Optional<Document> handle(AbstractEvent event, OperationResource executableResource) {
-        String sid = event.eventContext().getSid();
+        String sid = event.eventContext().getUser().getSid();
         String eventName = event.eventContext().getEventName();
         String operateName = executableResource.getOperateName();
         // if this event already closed
@@ -98,7 +98,7 @@ public class DefaultEventHandleService implements EventHandleService {
     private Document executeActions(Document document,
                                     AbstractEvent event,
                                     OperationResource executableResource) {
-        String sid = event.eventContext().getSid();
+        String sid = event.eventContext().getUser().getSid();
         String eventName = event.eventContext().getEventName();
         String operateName = executableResource.getOperateName();
         for (Action action : executableResource.allActions()) {
@@ -169,7 +169,7 @@ public class DefaultEventHandleService implements EventHandleService {
             if (operateTimes == 0) {
                 HeroEventContext eventContext = event.eventContext();
                 log.warn("operate 0 times [sid={}] [event={}] [operation={}] [operationObjects={}]",
-                        eventContext.getSid(), eventContext.getEventName(), executableResource.getOperateName(), operationObjects);
+                        eventContext.getUser().getSid(), eventContext.getEventName(), executableResource.getOperateName(), operationObjects);
                 break;
             }
             // only operate once and break loop, if fixed resource
