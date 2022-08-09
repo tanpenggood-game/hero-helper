@@ -120,7 +120,17 @@ public class DefaultEventBus implements EventBus {
             log.warn("exists running event [sid={}] [event={}]", sid, existedEvent.eventContext().getEventName());
             return false;
         }
-        String eventLog = isPauseEvent(sid) ? "restart be paused event" : "published event";
+        String eventLog = "published event";
+        if (isPauseEvent(sid)) {
+            String original = getEvent(sid).eventContext().getEventName();
+            String current = event.eventContext().getEventName();
+            if (Objects.equals(original, current)) {
+                eventLog = "restart be paused event";
+            } else {
+                log.warn("restart event inconsistency [sid={}] [original={}] [current={}]", sid, original, current);
+                return false;
+            }
+        }
         // create new event or restart be paused event
         event.eventContext().setStatus(EventStatusEnum.RUNNING);
         eventBusContainer.put(sid, event);
