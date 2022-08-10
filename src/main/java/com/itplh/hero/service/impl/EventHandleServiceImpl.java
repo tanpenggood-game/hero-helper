@@ -1,12 +1,14 @@
-package com.itplh.hero.service;
+package com.itplh.hero.service.impl;
 
 import com.itplh.hero.constant.ParameterEnum;
 import com.itplh.hero.domain.Action;
 import com.itplh.hero.domain.OperationResource;
+import com.itplh.hero.domain.OperationResourceSnapshot;
 import com.itplh.hero.event.AbstractEvent;
 import com.itplh.hero.event.HeroEventContext;
 import com.itplh.hero.event.core.NPCFixedEvent;
 import com.itplh.hero.listener.EventBus;
+import com.itplh.hero.service.EventHandleService;
 import com.itplh.hero.util.CollectionUtil;
 import com.itplh.hero.util.GameUtil;
 import com.itplh.hero.util.MoveUtil;
@@ -30,7 +32,7 @@ import static com.itplh.hero.util.RequestUtil.sleepThenGETRequest;
 
 @Slf4j
 @Service
-public class DefaultEventHandleService implements EventHandleService {
+public class EventHandleServiceImpl implements EventHandleService {
 
     @Autowired
     private EventBus eventBus;
@@ -80,6 +82,9 @@ public class DefaultEventHandleService implements EventHandleService {
         }
         // set start run time
         executableResource.setLastRunTime(LocalDateTime.now());
+        // real time update current operation resource
+        OperationResourceSnapshot currentOperationResource = new OperationResourceSnapshot(operateName, executableResource.getLastRunTime());
+        event.eventContext().setCurrentOperationResource(currentOperationResource);
         // 1. request uri
         Document document = sleepThenGETRequest(event.eventContext().buildURI(),
                 "start " + executableResource.getOperateName());

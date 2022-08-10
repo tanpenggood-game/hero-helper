@@ -53,6 +53,10 @@ public class HeroEventContext {
      */
     private Map<String, String> extendInfo;
     /**
+     * current operation resource
+     */
+    private OperationResourceSnapshot currentOperationResource;
+    /**
      * 操作快照
      * <p>
      * main used to event pause and restart
