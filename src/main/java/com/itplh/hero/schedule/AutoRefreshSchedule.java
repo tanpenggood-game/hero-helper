@@ -1,8 +1,8 @@
 package com.itplh.hero.schedule;
 
-import com.itplh.hero.context.HeroRegionUserContext;
 import com.itplh.hero.event.core.OnlyRefreshEvent;
 import com.itplh.hero.listener.EventBus;
+import com.itplh.hero.service.HeroRegionUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,9 +15,12 @@ public class AutoRefreshSchedule {
     @Autowired
     private EventBus eventBus;
 
+    @Autowired
+    private HeroRegionUserService heroRegionUserService;
+
     @Scheduled(cron = "0 0/10 * * * ? ")
     public void refresh() {
-        HeroRegionUserContext.getAll().forEach(user -> {
+        heroRegionUserService.getAll().forEach(user -> {
             if (!eventBus.containsEvent(user.getSid())) {
                 eventBus.publishEvent(OnlyRefreshEvent.refreshOnce(user.getSid()));
             }

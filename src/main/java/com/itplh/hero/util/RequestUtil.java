@@ -1,7 +1,8 @@
 package com.itplh.hero.util;
 
-import com.itplh.hero.context.HeroRegionUserContext;
+import com.itplh.hero.component.BeanUtil;
 import com.itplh.hero.domain.HeroRegionUser;
+import com.itplh.hero.service.HeroRegionUserService;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
@@ -154,7 +155,8 @@ public class RequestUtil {
 
         private RequestHelper(String uri, String operateLog) {
             Assert.hasText(uri, "uri is required.");
-            Optional<HeroRegionUser> regionUserOptional = HeroRegionUserContext.get(parseSid(uri));
+            HeroRegionUserService heroRegionUserService = BeanUtil.getBean(HeroRegionUserService.class);
+            Optional<HeroRegionUser> regionUserOptional = heroRegionUserService.get(parseSid(uri));
             Assert.isTrue(regionUserOptional.isPresent(), "sid is invalid.");
 
             this.URI = uri;

@@ -1,14 +1,16 @@
-package com.itplh.hero.context;
-
+package com.itplh.hero.service.impl;
 
 import com.itplh.hero.domain.HeroRegionUser;
+import com.itplh.hero.service.HeroRegionUserService;
+import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-public class HeroRegionUserContext {
+@Service
+public class HeroRegionUserServiceImpl implements HeroRegionUserService {
 
     /**
      * key sid
@@ -16,7 +18,8 @@ public class HeroRegionUserContext {
      */
     private static final ConcurrentSkipListMap<String, HeroRegionUser> regionUserContainer = new ConcurrentSkipListMap<>();
 
-    public static boolean save(HeroRegionUser heroRegionUser) {
+    @Override
+    public boolean save(HeroRegionUser heroRegionUser) {
         if (Objects.isNull(heroRegionUser) || Objects.isNull(heroRegionUser.getSid())) {
             return false;
         }
@@ -24,42 +27,46 @@ public class HeroRegionUserContext {
         return true;
     }
 
-    public static boolean delete(String sid) {
+    @Override
+    public boolean delete(String sid) {
         if (Objects.isNull(sid)) {
             return false;
         }
         return Optional.ofNullable(regionUserContainer.remove(sid)).isPresent();
     }
 
-    public static boolean deleteAll() {
-        int total = regionUserContainer.size();
+    @Override
+    public int deleteAll() {
         int[] removeCounter = {0};
         regionUserContainer.keySet()
                 .forEach(sid -> {
-                    boolean isSuccess = delete(sid);
-                    if (isSuccess) {
+                    if (delete(sid)) {
                         ++removeCounter[0];
                     }
                 });
-        return total == removeCounter[0];
+        return removeCounter[0];
     }
 
-    public static Optional<HeroRegionUser> get(String sid) {
+    @Override
+    public Optional<HeroRegionUser> get(String sid) {
         if (Objects.isNull(sid)) {
             return Optional.empty();
         }
         return Optional.ofNullable(regionUserContainer.get(sid));
     }
 
-    public static Collection<HeroRegionUser> getAll() {
+    @Override
+    public Collection<HeroRegionUser> getAll() {
         return regionUserContainer.values();
     }
 
-    public static Optional<HeroRegionUser> getFirst() {
+    @Override
+    public Optional<HeroRegionUser> getFirst() {
         return regionUserContainer.values().stream().findFirst();
     }
 
-    public static boolean contains(String sid) {
+    @Override
+    public boolean contains(String sid) {
         return get(sid).isPresent();
     }
 

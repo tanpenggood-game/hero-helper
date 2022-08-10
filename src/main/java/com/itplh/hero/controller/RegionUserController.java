@@ -1,8 +1,8 @@
 package com.itplh.hero.controller;
 
-import com.itplh.hero.context.HeroRegionUserContext;
 import com.itplh.hero.domain.HeroRegionUser;
 import com.itplh.hero.listener.EventBus;
+import com.itplh.hero.service.HeroRegionUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +17,9 @@ public class RegionUserController {
     @Autowired
     private EventBus eventBus;
 
+    @Autowired
+    private HeroRegionUserService heroRegionUserService;
+
     @PostMapping("/save")
     public Result save(@RequestBody HeroRegionUser regionUser) {
         if (Objects.isNull(regionUser)
@@ -26,7 +29,7 @@ public class RegionUserController {
         ) {
             return Result.error("表单数据异常");
         }
-        return Result.ok(HeroRegionUserContext.save(regionUser));
+        return Result.ok(heroRegionUserService.save(regionUser));
     }
 
     @PostMapping("/delete")
@@ -37,24 +40,23 @@ public class RegionUserController {
         if (eventBus.containsEvent(sid)) {
             return Result.error("please close related event.");
         }
-        // close event
-        eventBus.close(sid);
-        // delete user
-        boolean isSuccess = HeroRegionUserContext.delete(sid);
-        return Result.ok("[isSuccess=]" + isSuccess);
+        return Result.ok(String.format("[delete user={}] [close event={}]",
+                heroRegionUserService.delete(sid),
+                eventBus.close(sid)));
     }
 
     @PostMapping("/delete-all")
     public Result deleteAll() {
-        // close all event
-        HeroRegionUserContext.getAll().forEach(user -> eventBus.close(user.getSid()));
-        // delete all user
-        return Result.ok(HeroRegionUserContext.deleteAll());
+        eventBus.getAllEvent().stream().map(e -> e.eventContext().getUser().getSid())
+                .forEach(eventBus::close);
+        return Result.ok(String.format("[delete user={}] [close event={}]",
+                heroRegionUserService.deleteAll(),
+                eventBus.closeAll()));
     }
 
     @GetMapping("/get-all")
     public Result<Collection<HeroRegionUser>> getAll() {
-        return Result.ok(HeroRegionUserContext.getAll());
+        return Result.ok(heroRegionUserService.getAll());
     }
 
 }
