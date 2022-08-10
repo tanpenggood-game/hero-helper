@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 @Slf4j
 @Component
@@ -31,12 +32,23 @@ public class DefaultEventBus implements EventBus {
 
     @Override
     public boolean publishEvent(AbstractEvent event) {
+        if (Objects.isNull(event)) {
+            return false;
+        }
         return asyncPublishEvent(event.eventContext().getUser().getSid(), event);
     }
 
     @Override
     public boolean close(String sid) {
+        if (Objects.isNull(sid)) {
+            return false;
+        }
         return Optional.ofNullable(eventBusContainer.remove(sid)).isPresent();
+    }
+
+    @Override
+    public int closeAll() {
+        return operateAll(this::close);
     }
 
     @Override
@@ -46,6 +58,11 @@ public class DefaultEventBus implements EventBus {
                     event.eventContext().setStatus(EventStatusEnum.PAUSE);
                     return true;
                 }).orElse(false);
+    }
+
+    @Override
+    public int pauseAll() {
+        return operateAll(this::pause);
     }
 
     /**
@@ -59,6 +76,11 @@ public class DefaultEventBus implements EventBus {
         return getPauseEventOptional(sid)
                 .map(event -> asyncPublishEvent(sid, event))
                 .orElse(false);
+    }
+
+    @Override
+    public int restartAll() {
+        return operateAll(this::restart);
     }
 
     @Override
@@ -92,6 +114,9 @@ public class DefaultEventBus implements EventBus {
     }
 
     private Optional<AbstractEvent> getEventOptional(String sid) {
+        if (Objects.isNull(sid)) {
+            return Optional.empty();
+        }
         return Optional.ofNullable(eventBusContainer.get(sid));
     }
 
@@ -114,6 +139,9 @@ public class DefaultEventBus implements EventBus {
      * @return
      */
     private boolean asyncPublishEvent(String sid, AbstractEvent event) {
+        if (Objects.isNull(sid) || Objects.isNull(event)) {
+            return false;
+        }
         // warning, if exists running event
         if (isRunningEvent(sid)) {
             AbstractEvent existedEvent = getEvent(sid);
@@ -138,6 +166,18 @@ public class DefaultEventBus implements EventBus {
         threadPoolTaskExecutor.execute(() -> applicationContext.publishEvent(event));
         log.info("{} [sid={}] [event={}]", eventLog, sid, event.eventContext().getEventName());
         return true;
+    }
+
+    private int operateAll(Function<String, Boolean> function) {
+        int[] successCounter = {0};
+        getAllEvent().stream()
+                .map(event -> event.eventContext().getUser().getSid())
+                .forEach(sid -> {
+                    if (function.apply(sid)) {
+                        ++successCounter[0];
+                    }
+                });
+        return successCounter[0];
     }
 
 }

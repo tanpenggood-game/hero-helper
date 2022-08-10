@@ -10,7 +10,11 @@ public interface EventBus {
 
     boolean close(String sid);
 
+    int closeAll();
+
     boolean pause(String sid);
+
+    int pauseAll();
 
     /**
      * restart pause event
@@ -19,6 +23,8 @@ public interface EventBus {
      * @return
      */
     boolean restart(String sid);
+
+    int restartAll();
 
     boolean isClosedEvent(String sid);
 
