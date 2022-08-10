@@ -5,7 +5,6 @@ import com.itplh.hero.domain.OperationResource;
 import com.itplh.hero.event.AbstractEvent;
 import com.itplh.hero.event.HeroEventContext;
 import com.itplh.hero.event.core.NPCFixedEvent;
-import com.itplh.hero.event.core.NPCTimedRefreshEvent;
 import com.itplh.hero.util.EventTemplateUtil;
 import com.itplh.hero.util.SnapshotUtil;
 import com.itplh.hero.util.ThreadUtil;
@@ -188,6 +187,9 @@ public class DefaultApplicationListenerHelper implements ApplicationListenerHelp
 
     private void printLogForNextExecuteResource(AbstractEvent event,
                                                 Collection<OperationResource> executableResources) {
+        if (!event.isNeedSleep()) {
+            return;
+        }
         for (OperationResource executableResource : executableResources) {
             String sid = event.eventContext().getUser().getSid();
             String eventName = event.eventContext().getEventName();
