@@ -15,3 +15,22 @@ npc:
         actions:
           - operation-steps: 在线时间x15兑换万虫羹x1
           - operation-steps: 在线时间x30兑换高级万虫羹x1
+          - operation-steps: 在线时间x30兑换万虫羹x1(151级)
+          - operation-steps: 在线时间x45兑换高级万虫羹x1(151级)
+
+      benefits-broken-dream-crystal:
+        operate-name: 领取每日破碎梦晶石(151级)
+        start-position: 史家庄
+        actions:
+          - direction: DOWN
+            has-callback: false
+          - direction: DOWN
+            operation-objects: 史家丫鬟.小红
+            operation-steps: 领取每日破碎梦晶石
+
+      benefits-ancient-city-legend-map:
+        operate-name: 领取每日古城传说图谱(151级)
+        start-position: 桃花村
+        actions:
+          - operation-objects: 桃花村牧童
+            operation-steps: 领取每日古城传说图谱
