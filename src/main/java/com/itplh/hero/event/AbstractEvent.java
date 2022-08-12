@@ -1,5 +1,6 @@
 package com.itplh.hero.event;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.context.ApplicationEvent;
 
 public abstract class AbstractEvent extends ApplicationEvent {
@@ -17,6 +18,7 @@ public abstract class AbstractEvent extends ApplicationEvent {
      *
      * @return return true, this event meet sleep conditions; return false, needn't sleep.
      */
+    @JsonIgnore
     public boolean isNeedSleep() {
         return false;
     }
