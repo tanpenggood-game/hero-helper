@@ -27,8 +27,7 @@ public class GameUtil {
             return Optional.ofNullable(document);
         }
         // check offline
-        boolean isOffline = queryURIByLinkName(document, "快速登陆").isPresent();
-        if (isOffline) {
+        if (isOffline(document)) {
             log.warn("This account already is offline status.");
             return Optional.empty();
         }
@@ -126,6 +125,16 @@ public class GameUtil {
                 .map(doc -> doc.getElementsContainingOwnText("战斗已经结束!"))
                 .map(elements -> !CollectionUtils.isEmpty(elements))
                 .orElse(false);
+    }
+
+    /**
+     * 是否已经离线
+     *
+     * @param document
+     * @return
+     */
+    public static boolean isOffline(Document document) {
+        return queryURIByLinkName(document, "快速登陆").isPresent();
     }
 
 }
