@@ -9,6 +9,7 @@ import com.itplh.hero.event.HeroEventContext;
 import com.itplh.hero.event.core.NPCFixedEvent;
 import com.itplh.hero.listener.EventBus;
 import com.itplh.hero.service.EventHandleService;
+import com.itplh.hero.service.HeroRegionUserService;
 import com.itplh.hero.util.CollectionUtil;
 import com.itplh.hero.util.GameUtil;
 import com.itplh.hero.util.MoveUtil;
@@ -24,8 +25,7 @@ import java.util.stream.Collectors;
 
 import static com.itplh.hero.util.CollectionUtil.getLog;
 import static com.itplh.hero.util.ElementUtil.queryURIByLinkName;
-import static com.itplh.hero.util.GameUtil.requestAutoBattle;
-import static com.itplh.hero.util.GameUtil.requestReturnGameMainPage;
+import static com.itplh.hero.util.GameUtil.*;
 import static com.itplh.hero.util.Go1000mUtil.go1000m;
 import static com.itplh.hero.util.RequestUtil.requestByLinkName;
 import static com.itplh.hero.util.RequestUtil.sleepThenGETRequest;
@@ -36,6 +36,9 @@ public class EventHandleServiceImpl implements EventHandleService {
 
     @Autowired
     private EventBus eventBus;
+
+    @Autowired
+    private HeroRegionUserService heroRegionUserService;
 
     @Override
     public boolean handle(AbstractEvent event, Collection<OperationResource> executableResources) {
@@ -70,6 +73,11 @@ public class EventHandleServiceImpl implements EventHandleService {
         String sid = event.eventContext().getUser().getSid();
         String eventName = event.eventContext().getEventName();
         String operateName = executableResource.getOperateName();
+        // if this user not exists
+        if (!heroRegionUserService.contains(sid)) {
+            log.warn("user not exists [sid={}] [eventName={}] [operateName={}]", sid, eventName, operateName);
+            return Optional.empty();
+        }
         // if this event already closed
         if (eventBus.isClosedEvent(sid)) {
             log.info("event is closed [sid={}] [eventName={}] [operateName={}]", sid, eventName, operateName);
@@ -88,6 +96,14 @@ public class EventHandleServiceImpl implements EventHandleService {
         // 1. request uri
         Document document = sleepThenGETRequest(event.eventContext().buildURI(),
                 "start " + executableResource.getOperateName());
+        //  delete user & close event, if user already offline
+        if (isOffline(document)) {
+            boolean isClosed = eventBus.close(sid);
+            boolean isDelete = heroRegionUserService.delete(sid);
+            log.warn("user already offline [sid={}] [eventName={}] [operateName={}] [close event={}] [delete user={}]",
+                    sid, eventName, operateName, isClosed, isDelete);
+            return Optional.empty();
+        }
         // 2. revise to target position
         document = go1000m(document, executableResource.getStartPosition()).orElse(null);
         // supply grain if necessary
