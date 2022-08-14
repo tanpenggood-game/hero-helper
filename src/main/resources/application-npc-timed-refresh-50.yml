@@ -44,3 +44,9 @@ npc:
               - 继续
               - 巨大青蛇
               - 攻击巨大青蛇
+
+      cangzhou-pull-house:
+        operate-name: 牵汗血宝马
+        start-position: 沧州_草屋
+        refresh-frequency: 10
+        global-operation-objects: 牵走汗血宝马
