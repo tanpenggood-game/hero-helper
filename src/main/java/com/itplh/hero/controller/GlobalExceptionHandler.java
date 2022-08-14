@@ -13,5 +13,5 @@ public class GlobalExceptionHandler {
         log.error(e.getMessage(), e);
         return Result.error(e.getMessage());
     }
-    
+
 }
