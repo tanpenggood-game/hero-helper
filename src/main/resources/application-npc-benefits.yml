@@ -34,3 +34,11 @@ npc:
         actions:
           - operation-objects: 桃花村牧童
             operation-steps: 领取每日古城传说图谱
+
+      benefits-platinum-vip:
+        operate-name: 白金VIP每日福利
+        actions:
+          - operation-objects: 状态
+            operation-steps:
+              - 白金VIP
+              - 领取奖励
