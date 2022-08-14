@@ -8,6 +8,13 @@ npc:
           - operation-objects: 青蛇
             operation-steps: 攻击青蛇
 
+      fixed-attack-python:
+        operate-name: 攻击巨蛇
+        start-position: 食人谷悬崖
+        actions:
+          - operation-objects: 巨蛇
+            operation-steps: 攻击巨蛇
+
       fixed-old-ox:
         operate-name: 攻击老黄牛
         start-position: 东大街_老黄牛
@@ -22,18 +29,15 @@ npc:
           - operation-objects: 宝库守卫
             operation-steps: 攻击宝库守卫
 
-      fixed-attack-python:
-        operate-name: 攻击巨蛇
-        start-position: 食人谷悬崖
+      fixed-pieris-mutans:
+        operate-name: 攻击变异菜青虫(大白菜-15)
+        start-position: 东京_菜园
+        global-operation-objects: 诱出变异菜青虫
         actions:
-          - operation-objects: 巨蛇
-            operation-steps: 攻击巨蛇
-
-      fixed-cangzhou-pull-house:
-        operate-name: 牵汗血宝马
-        start-position: 沧州_草屋
-        refresh-frequency: 10
-        global-operation-objects: 牵走汗血宝马
+          - direction: LEFT
+            has-callback: false
+            repeat-times: 4
+          - direction: DOWN
 
       fixed-exchange-resources-100-50:
         operate-name: 潜能转资源(100:50)
