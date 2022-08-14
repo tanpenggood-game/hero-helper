@@ -7,6 +7,7 @@ import com.itplh.hero.domain.OperationResourceSnapshot;
 import com.itplh.hero.event.AbstractEvent;
 import com.itplh.hero.event.HeroEventContext;
 import com.itplh.hero.event.core.NPCFixedEvent;
+import com.itplh.hero.event.core.OnlyRefreshEvent;
 import com.itplh.hero.listener.EventBus;
 import com.itplh.hero.service.EventHandleService;
 import com.itplh.hero.service.HeroRegionUserService;
@@ -103,6 +104,11 @@ public class EventHandleServiceImpl implements EventHandleService {
             log.warn("user already offline [sid={}] [eventName={}] [operateName={}] [close event={}] [delete user={}]",
                     sid, eventName, operateName, isClosed, isDelete);
             return Optional.empty();
+        }
+        // don't return game main page, if event is OnlyRefreshEvent
+        if (event instanceof OnlyRefreshEvent) {
+            log.info("only refresh event [sid={}] [eventName={}] [operateName={}]]", sid, eventName, operateName);
+            return Optional.ofNullable(document);
         }
         // 2. revise to target position
         document = go1000m(document, executableResource.getStartPosition()).orElse(null);
