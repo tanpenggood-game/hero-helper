@@ -76,10 +76,16 @@ public class GameUtil {
         String operateLog = "robot request-自动战斗中";
         if (isBattlePage(document)) {
             do {
-                // 默认使用技能1
-                document = ElementUtil.queryURIByFirstALink(document)
-                        .map(uri -> sleepThenGETRequest(uri, operateLog))
-                        .orElse(null);
+                // 默认使用普通攻击，否则使用技能1
+                if (queryURIByLinkName(document, "普通攻击").isPresent()) {
+                    document = queryURIByLinkName(document, "普通攻击")
+                            .map(uri -> sleepThenGETRequest(uri, operateLog))
+                            .orElse(null);
+                } else {
+                    document = ElementUtil.queryURIByFirstALink(document)
+                            .map(uri -> sleepThenGETRequest(uri, operateLog))
+                            .orElse(null);
+                }
                 if (Objects.isNull(document)) {
                     return Optional.empty();
                 }
