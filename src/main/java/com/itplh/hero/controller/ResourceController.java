@@ -20,6 +20,7 @@ public class ResourceController {
     public Result<List<OptionGroup>> resourceGet(String eventName) {
         List<Option> groupList = new ArrayList<>();
         List<Option> bossList = new ArrayList<>();
+        List<Option> resourceExchangeList = new ArrayList<>();
         List<Option> otherList = new ArrayList<>();
 
         EventTemplateUtil.getEventClass(eventName).ifPresent(eventClass ->
@@ -34,11 +35,11 @@ public class ResourceController {
                             option.setSort(entry.getValue().getPriority());
 
                             String resourceKey = entry.getKey();
-                            if (resourceKey.startsWith("group")) {
-                                groupList.add(option);
-                            } else if (resourceKey.startsWith("boss")) {
-                                bossList.add(option);
-                            } else {
+                            int addCounter = 0;
+                            addCounter += addIfStartsWith(option, groupList, resourceKey.startsWith("group"));
+                            addCounter += addIfStartsWith(option, bossList, resourceKey.startsWith("boss"));
+                            addCounter += addIfStartsWith(option, resourceExchangeList, resourceKey.startsWith("exchange"));
+                            if (addCounter == 0) {
                                 otherList.add(option);
                             }
                         }));
@@ -46,17 +47,26 @@ public class ResourceController {
         bossList.sort(Comparator.comparing(Option::getSort).reversed());
 
         List<OptionGroup> groupOptions = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(groupList)) {
-            groupOptions.add(new OptionGroup("Monster group", groupList));
-        }
-        if (!CollectionUtils.isEmpty(bossList)) {
-            groupOptions.add(new OptionGroup("Boss", bossList));
-        }
-        if (!CollectionUtils.isEmpty(otherList)) {
-            groupOptions.add(new OptionGroup("Other", otherList));
-        }
+        addIfNotEmpty(groupOptions, groupList, "Monster group");
+        addIfNotEmpty(groupOptions, bossList, "Boss");
+        addIfNotEmpty(groupOptions, resourceExchangeList, "Resource exchange");
+        addIfNotEmpty(groupOptions, otherList, "Other");
 
         return Result.ok(groupOptions);
+    }
+
+    private void addIfNotEmpty(List<OptionGroup> groupOptions, List<Option> options, String label) {
+        if (!CollectionUtils.isEmpty(options)) {
+            groupOptions.add(new OptionGroup(label, options));
+        }
+    }
+
+    private int addIfStartsWith(Option option, List<Option> options, boolean startsWith) {
+        if (startsWith) {
+            options.add(option);
+            return 1;
+        }
+        return 0;
     }
 
 }
