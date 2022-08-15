@@ -139,9 +139,15 @@ public class EventController {
             return Result.error("eventName is invalid.");
         }
         if (Objects.equals(eventName, NPCFixedEvent.class.getSimpleName())) {
-            String resource = ParameterEnum.RESOURCE.getName();
-            if (CollectionUtils.isEmpty(extendInfo) || !extendInfo.containsKey(resource)) {
-                return Result.error(String.format("%s must set %s", NPCFixedEvent.class.getSimpleName(), resource));
+            String resource = ParameterEnum.RESOURCES.getName();
+            if (CollectionUtils.isEmpty(extendInfo)
+                    || !extendInfo.containsKey(resource)
+                    || extendInfo.get(resource).contains(",")) {
+                return Result.error(String.format("%s must select one resource", NPCFixedEvent.class.getSimpleName()));
+            }
+            String exclude = ParameterEnum.EXCLUDE.getName();
+            if (Objects.equals("true", extendInfo.get(exclude))) {
+                return Result.error(String.format("%s don't allow select %s", NPCFixedEvent.class.getSimpleName(), exclude));
             }
         }
         return Result.ok();
