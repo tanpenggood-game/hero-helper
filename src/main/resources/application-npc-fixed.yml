@@ -31,15 +31,20 @@ npc:
 
       fixed-pieris-mutans:
         operate-name: 攻击变异菜青虫(大白菜-15)
-        start-position: 东京_菜园
-        global-operation-objects: 诱出变异菜青虫
+        start-position: 大菜畦
         actions:
-          - direction: LEFT
-            has-callback: false
-            repeat-times: 4
-          - direction: DOWN
+          - operation-objects: 诱出变异菜青虫
 
-      fixed-exchange-resources-100-50:
+      exchange-king-kong-book:
+        operate-name: 研制金刚奇书
+        start-position: 北大街
+        actions:
+          - operation-objects: 游方和尚
+            operation-steps:
+              - 1,研制金刚奇书
+              - 返回游方和尚
+
+      exchange-resources-100-50:
         operate-name: 潜能转资源(100:50)
         start-position: 寒玉狮前厅
         global-operation-objects: 灵隐和尚
@@ -57,7 +62,7 @@ npc:
               - 潜能转资源(100:50)
               - 4潜能转化为石料(1000万:500万)
 
-      fixed-exchange-resources-100-100:
+      exchange-resources-100-100:
         operate-name: 潜能转资源(100:100)
         start-position: 寒玉狮前厅
         global-operation-objects: 灵隐和尚
