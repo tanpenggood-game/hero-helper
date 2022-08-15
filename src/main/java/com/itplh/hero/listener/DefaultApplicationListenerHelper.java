@@ -5,6 +5,7 @@ import com.itplh.hero.domain.OperationResource;
 import com.itplh.hero.event.AbstractEvent;
 import com.itplh.hero.event.HeroEventContext;
 import com.itplh.hero.event.core.NPCFixedEvent;
+import com.itplh.hero.util.CollectionUtil;
 import com.itplh.hero.util.EventTemplateUtil;
 import com.itplh.hero.util.SnapshotUtil;
 import com.itplh.hero.util.ThreadUtil;
@@ -114,7 +115,7 @@ public class DefaultApplicationListenerHelper implements ApplicationListenerHelp
     /**
      * 返回用户可操作的资源
      * <p>
-     * 通过静态配置项和用户输入参数，将会过滤掉一些资源
+     * 通过静态配置项和用户输入参数，将会过滤掉一些资源 {@link CollectionUtil#removeResourceIfNecessary(AbstractEvent, Map)}
      * 过滤条件更静态，只需要计算一次
      *
      * @param event
@@ -123,37 +124,10 @@ public class DefaultApplicationListenerHelper implements ApplicationListenerHelp
      */
     private Map<String, OperationResource> getOperableResources(AbstractEvent event,
                                                                 Map<String, OperationResource> operationResourceTemplate) {
-        // parse user input parameters
-        List resourceParameters = event.eventContext()
-                .queryExtendInfo(ParameterEnum.RESOURCE)
-                .map(e -> e.split(","))
-                .map(Arrays::asList)
-                .orElse(Collections.EMPTY_LIST);
-        boolean isNovice = event.eventContext()
-                .queryExtendInfo(ParameterEnum.NOVICE)
-                .map(Boolean::valueOf)
-                .orElse(false);
-
-        // remove some resource if necessary
-        Iterator<Map.Entry<String, OperationResource>> iterator = operationResourceTemplate.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, OperationResource> operationResourceEntry = iterator.next();
-            String resourceKey = operationResourceEntry.getKey();
-            OperationResource operationResource = operationResourceEntry.getValue();
-            // remove, if user is novice and this resource enabled novice protected
-            if (operationResource.isProtected(isNovice)) {
-                iterator.remove();
-                continue;
-            }
-            // remove, if user selected resource
-            if (!CollectionUtils.isEmpty(resourceParameters) && !resourceParameters.contains(resourceKey)) {
-                iterator.remove();
-                continue;
-            }
-        }
+        // remove, if don't met condition
+        CollectionUtil.removeResourceIfNecessary(event, operationResourceTemplate);
 
         Map<String, OperationResource> operableResources = new LinkedHashMap<>();
-
         // only select one, if event equals npc fixed event
         if (event instanceof NPCFixedEvent) {
             operationResourceTemplate.entrySet().stream()

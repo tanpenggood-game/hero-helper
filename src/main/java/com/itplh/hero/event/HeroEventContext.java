@@ -45,11 +45,7 @@ public class HeroEventContext {
     /**
      * 额外的扩展信息
      * <p>
-     * extendInfo parameter includes parameter as follow:
-     * 1. mapping, used to specify the operation object
-     * 2. novice, set value as true, will enable novice protection when operation resource
-     * 3. isSupplyGrain, set value as true, will be supplied grain before operate every resource
-     * or see {@link ParameterEnum}
+     * extendInfo parameter detail, please see {@link ParameterEnum}
      */
     private Map<String, String> extendInfo;
     /**
