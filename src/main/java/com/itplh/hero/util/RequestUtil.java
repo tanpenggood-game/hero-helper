@@ -39,8 +39,7 @@ public class RequestUtil {
      * @return
      */
     public static Document sleepThenGETRequest(String uri, String operateLog) {
-        ThreadUtil.sleep(SLEEP_MILLISECONDS);
-        return requestPlus(RequestHelper.get(uri, operateLog),
+        return sleepThenRequestPlus(RequestHelper.get(uri, operateLog),
                 (requestHelper) -> request(requestHelper));
     }
 
@@ -82,8 +81,9 @@ public class RequestUtil {
         return document;
     }
 
-    private static Document requestPlus(RequestHelper requestHelper,
-                                        Function<RequestHelper, Document> requestFunction) {
+    private static Document sleepThenRequestPlus(RequestHelper requestHelper,
+                                                 Function<RequestHelper, Document> requestFunction) {
+        ThreadUtil.sleep(SLEEP_MILLISECONDS);
         Document document = requestFunction.apply(requestHelper);
         // second retry
         if (Objects.isNull(document)) {
