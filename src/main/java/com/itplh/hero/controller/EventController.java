@@ -1,7 +1,7 @@
 package com.itplh.hero.controller;
 
 import com.itplh.hero.constant.ParameterEnum;
-import com.itplh.hero.domain.HeroRegionUser;
+import com.itplh.hero.domain.EventTriggerBody;
 import com.itplh.hero.domain.SimpleUser;
 import com.itplh.hero.event.HeroEventContext;
 import com.itplh.hero.event.core.NPCFixedEvent;
@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -30,31 +31,32 @@ public class EventController {
     private HeroRegionUserService heroRegionUserService;
 
     @PostMapping("/trigger")
-    public Result eventTrigger(@RequestParam(required = true) String eventName,
-                               @RequestParam(required = false) String sid,
-                               @RequestParam(required = false, defaultValue = "1") Long targetRunRound,
-                               @RequestBody Map<String, String> extendInfo) {
-        sid = setDefaultSidIfAbsent(sid);
-
-        Result validate = validate(eventName, sid, extendInfo);
+    public Result eventTrigger(@RequestBody EventTriggerBody eventTriggerBody) {
+        // check parameters
+        Result validate = validate(eventTriggerBody);
         if (!validate.isSuccess()) {
             return validate;
         }
 
-        log.info("start trigger [sid={}] [eventName={}]", sid, eventName);
-        SimpleUser user = heroRegionUserService.get(sid).get().simpleUser();
-        HeroEventContext heroEventContext = HeroEventContext.newInstance(user, eventName, targetRunRound, extendInfo);
-        boolean isSuccess = EventTemplateUtil.getEventInstance(eventName, heroEventContext)
-                .map(event -> eventBus.publishEvent(event))
-                .orElse(false);
-        log.info("finish trigger [sid={}] [eventName={}] [isSuccess={}]", sid, eventName, isSuccess);
-        return Result.ok(String.format("finish trigger [sid=%s] [eventName=%s]  [isSuccess=%s]", sid, eventName, isSuccess));
+        String eventName = eventTriggerBody.getEventName();
+        long targetRunRound = eventTriggerBody.getTargetRunRound();
+        int triggerSuccessCounter = 0;
+        for (String sid : eventTriggerBody.getSids()) {
+            Map<String, String> extendInfo = eventTriggerBody.getExtendInfo();
+            log.info("start trigger [sid={}] [eventName={}]", sid, eventName);
+            SimpleUser user = heroRegionUserService.get(sid).get().simpleUser();
+            HeroEventContext heroEventContext = HeroEventContext.newInstance(user, eventName, targetRunRound, extendInfo);
+            boolean isSuccess = EventTemplateUtil.getEventInstance(eventName, heroEventContext)
+                    .map(event -> eventBus.publishEvent(event))
+                    .orElse(false);
+            log.info("finish trigger [sid={}] [eventName={}] [isSuccess={}]", sid, eventName, isSuccess);
+            triggerSuccessCounter = isSuccess ? ++triggerSuccessCounter : triggerSuccessCounter;
+        }
+        return Result.ok(String.format("finish trigger [eventName=%s] [triggerSuccessCounter=%s]", eventName, triggerSuccessCounter));
     }
 
     @PostMapping("/close")
     public Result eventClose(String sid) {
-        sid = setDefaultSidIfAbsent(sid);
-
         log.info("start close [sid={}]", sid);
         boolean isSuccess = eventBus.close(sid);
         log.info("finish close [sid={}] [isSuccess={}]", sid, isSuccess);
@@ -71,8 +73,6 @@ public class EventController {
 
     @PostMapping("/pause")
     public Result eventPause(String sid) {
-        sid = setDefaultSidIfAbsent(sid);
-
         log.info("start pause [sid={}]", sid);
         boolean isSuccess = eventBus.pause(sid);
         log.info("finish pause [sid={}] [isSuccess={}]", sid, isSuccess);
@@ -89,8 +89,6 @@ public class EventController {
 
     @PostMapping("/restart")
     public Result eventRestart(String sid) {
-        sid = setDefaultSidIfAbsent(sid);
-
         log.info("start restart [sid={}]", sid);
         boolean isSuccess = eventBus.restart(sid);
         log.info("finish restart [sid={}] [isSuccess={}]", sid, isSuccess);
@@ -107,7 +105,6 @@ public class EventController {
 
     @GetMapping("/get")
     public Result eventOne(String sid) {
-        sid = setDefaultSidIfAbsent(sid);
         return Result.ok(eventBus.getEvent(sid));
     }
 
@@ -116,28 +113,28 @@ public class EventController {
         return Result.ok(eventBus.getAllEvent());
     }
 
-    private String setDefaultSidIfAbsent(String sid) {
-        if (StringUtils.isEmpty(sid)) {
-            Optional<HeroRegionUser> first = heroRegionUserService.getFirst();
-            if (first.isPresent()) {
-                sid = first.get().getSid();
-            }
+    private Result validate(EventTriggerBody eventTriggerBody) {
+        if (Objects.isNull(eventTriggerBody)) {
+            return Result.error("request body is invalid.");
         }
-        return sid;
-    }
-
-    private Result validate(String eventName,
-                            String sid,
-                            Map<String, String> extendInfo) {
-        if (!heroRegionUserService.contains(sid)) {
-            return Result.error("sid is invalid.");
+        // check sid
+        Set<String> validSidSet = eventTriggerBody.getSids().stream()
+                .filter(heroRegionUserService::contains)
+                .collect(Collectors.toSet());
+        eventTriggerBody.setSids(validSidSet);
+        if (CollectionUtils.isEmpty(validSidSet)) {
+            return Result.error("game role is required.");
         }
+        // check event name
+        String eventName = eventTriggerBody.getEventName();
         if (StringUtils.isEmpty(eventName)) {
             return Result.error("eventName is required.");
         }
         if (!EventTemplateUtil.hasEventInstance(eventName)) {
             return Result.error("eventName is invalid.");
         }
+        // check extend info
+        Map<String, String> extendInfo = eventTriggerBody.getExtendInfo();
         if (Objects.equals(eventName, NPCFixedEvent.class.getSimpleName())) {
             String resource = ParameterEnum.RESOURCES.getName();
             if (CollectionUtils.isEmpty(extendInfo)
