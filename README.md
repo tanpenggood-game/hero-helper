@@ -74,4 +74,16 @@
 
 ## 业务流程
 
+### POST /event/trigger
+
+![/event/trigger](./images/EventController_eventTrigger.png)
+
+### Listener doOnApplicationEvent
+
+![/event/trigger](./images/DefaultApplicationListenerHelper_doOnApplicationEvent.png)
+
+### Service handle
+
+![/event/trigger](./images/EventHandleServiceImpl_handle.png)
+
 ## 系统效果
