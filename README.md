@@ -2,6 +2,7 @@
 
 枭雄（一款页面网游）辅助。
 
+
 ## 游戏网址
 
 - [手机ok网](http://wapok.cn/)
@@ -50,6 +51,7 @@
 1. 运行启动类 `com.itplh.hero.HeroHelperApplication`
 2. 浏览器访问：http://localhost:8080
 
+
 ## 技术栈
 
 ### 开发环境
@@ -72,18 +74,39 @@
 - HTTP请求库：axios 0.27.2
 - 时间处理库：moment.js 2.29.1
 
+
 ## 业务流程
 
 ### POST /event/trigger
 
-![/event/trigger](./images/EventController_eventTrigger.png)
+![POST /event/trigger flow chart](https://raw.githubusercontent.com/tanpenggood/hero-helper/main/images/EventController_eventTrigger.png)
 
 ### Listener doOnApplicationEvent
 
-![/event/trigger](./images/DefaultApplicationListenerHelper_doOnApplicationEvent.png)
+![Listener doOnApplicationEvent flow chart](https://raw.githubusercontent.com/tanpenggood/hero-helper/main/images/DefaultApplicationListenerHelper_doOnApplicationEvent.png)
 
 ### Service handle
 
-![/event/trigger](./images/EventHandleServiceImpl_handle.png)
+![Service handle flow chart](https://raw.githubusercontent.com/tanpenggood/hero-helper/main/images/EventHandleServiceImpl_handle.png)
+
 
 ## 系统效果
+
+### Event Trigger Tool
+
+![Event Trigger Tool](https://raw.githubusercontent.com/tanpenggood/hero-helper/main/images/Page-EventTriggerTool.jpeg)
+
+### Region User Manager
+
+![Region User Manager](https://raw.githubusercontent.com/tanpenggood/hero-helper/main/images/Page-UserManager.jpeg)
+
+
+## Visitors
+
+![](http://profile-counter.glitch.me/tanpenggood/count.svg)
+
+## Contributors
+
+<a href="https://github.com/tanpenggood/hero-helper/contributors">
+  <img src="https://contributors-img.web.app/image?repo=tanpenggood/hero-helper" />
+</a>
