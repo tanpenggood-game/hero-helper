@@ -3,7 +3,7 @@
 枭雄（一款页面网游）辅助。
 
 
-## Play the Game
+## I want play Hero
 
 - [手机ok网](http://wapok.cn/)
 
