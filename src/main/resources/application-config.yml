@@ -1,0 +1,35 @@
+spring:
+  # DataSource Config
+  datasource:
+    driver-class-name: org.h2.Driver
+    # 配置h2数据库的连接地址（嵌入式）
+    url: jdbc:h2:./data/hero_helper;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1;MODE=MYSQL;
+    username: hero_helper
+    password: hero_helper
+    # 每次启动程序都会运行schema.sql文件，会根据需要创建表结构
+    schema: classpath:db/schema.sql
+    # 连接池配置
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 15
+      auto-commit: true
+      idle-timeout: 30000
+      pool-name: heroHelperHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+  # H2 Config
+  h2:
+    console:
+      # 开启web console功能
+      enabled: true
+      # 默认 /h2-console
+      path: /h2
+
+# Mybatis Plus Config
+mybatis-plus:
+  mapper-locations: classpath*:com/itplh/hero/mapper/xml/*Mapper.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+    call-setters-on-nulls: true

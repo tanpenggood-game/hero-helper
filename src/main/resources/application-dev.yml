@@ -1,3 +1,7 @@
 logging:
   level:
     com.itplh.hero: trace
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
