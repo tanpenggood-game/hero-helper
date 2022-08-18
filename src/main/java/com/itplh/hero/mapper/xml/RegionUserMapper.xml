@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itplh.hero.mapper.RegionUserMapper">
+
+    <select id="selectBySid" resultType="com.itplh.hero.domain.HeroRegionUser">
+      SELECT * FROM t_region_user WHERE sid = #{sid}
+    </select>
+
+    <delete id="deleteBySid">
+      DELETE FROM t_region_user WHERE sid = #{sid}
+    </delete>
+
+</mapper>

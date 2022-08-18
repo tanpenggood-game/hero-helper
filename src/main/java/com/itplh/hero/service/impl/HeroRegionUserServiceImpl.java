@@ -1,30 +1,38 @@
 package com.itplh.hero.service.impl;
 
 import com.itplh.hero.domain.HeroRegionUser;
+import com.itplh.hero.mapper.RegionUserMapper;
 import com.itplh.hero.service.HeroRegionUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentSkipListMap;
 
 @Service
 public class HeroRegionUserServiceImpl implements HeroRegionUserService {
 
-    /**
-     * key sid
-     * value {@link HeroRegionUser}
-     */
-    private static final ConcurrentSkipListMap<String, HeroRegionUser> regionUserContainer = new ConcurrentSkipListMap<>();
+    @Autowired
+    private RegionUserMapper regionUserMapper;
 
     @Override
     public boolean save(HeroRegionUser heroRegionUser) {
         if (Objects.isNull(heroRegionUser) || Objects.isNull(heroRegionUser.getSid())) {
             return false;
         }
-        regionUserContainer.put(heroRegionUser.getSid(), heroRegionUser);
-        return true;
+        HeroRegionUser dbUser = regionUserMapper.selectBySid(heroRegionUser.getSid());
+        int affectedRows;
+        if (Objects.isNull(dbUser)) {
+            heroRegionUser.setCreateTime(LocalDateTime.now());
+            affectedRows = regionUserMapper.insert(heroRegionUser);
+        } else {
+            heroRegionUser.setId(dbUser.getId());
+            heroRegionUser.setLastUpdateTime(LocalDateTime.now());
+            affectedRows = regionUserMapper.updateById(heroRegionUser);
+        }
+        return affectedRows > 0;
     }
 
     @Override
@@ -32,18 +40,16 @@ public class HeroRegionUserServiceImpl implements HeroRegionUserService {
         if (Objects.isNull(sid)) {
             return false;
         }
-        return Optional.ofNullable(regionUserContainer.remove(sid)).isPresent();
+        int affectedRows = regionUserMapper.deleteBySid(sid);
+        return affectedRows > 0;
     }
 
     @Override
     public int deleteAll() {
         int[] removeCounter = {0};
-        regionUserContainer.keySet()
-                .forEach(sid -> {
-                    if (delete(sid)) {
-                        ++removeCounter[0];
-                    }
-                });
+        getAll().stream()
+                .map(HeroRegionUser::getId)
+                .forEach(id -> removeCounter[0] += regionUserMapper.deleteById(id));
         return removeCounter[0];
     }
 
@@ -52,17 +58,12 @@ public class HeroRegionUserServiceImpl implements HeroRegionUserService {
         if (Objects.isNull(sid)) {
             return Optional.empty();
         }
-        return Optional.ofNullable(regionUserContainer.get(sid));
+        return Optional.ofNullable(regionUserMapper.selectBySid(sid));
     }
 
     @Override
     public Collection<HeroRegionUser> getAll() {
-        return regionUserContainer.values();
-    }
-
-    @Override
-    public Optional<HeroRegionUser> getFirst() {
-        return regionUserContainer.values().stream().findFirst();
+        return regionUserMapper.selectList(null);
     }
 
     @Override
