@@ -1,10 +1,20 @@
 package com.itplh.hero.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
+@TableName("t_region_user")
 public class HeroRegionUser {
+
+    @TableId(type = IdType.AUTO)
+    private Integer id;
 
     /**
      * 用户身份标识
@@ -41,8 +51,11 @@ public class HeroRegionUser {
      */
     private String roleName;
 
-    private long timestamp = System.currentTimeMillis();
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createTime;
 
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime lastUpdateTime;
 
     public SimpleUser simpleUser() {
         SimpleUser simpleUser = new SimpleUser();

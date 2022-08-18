@@ -20,8 +20,6 @@ public interface HeroRegionUserService {
 
     Collection<HeroRegionUser> getAll();
 
-    Optional<HeroRegionUser> getFirst();
-
     boolean contains(String sid);
 
 }
