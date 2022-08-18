@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hero Helper</title>
+    <link href="css/third/ant-design-vue/2.2.2/antd.min.css" rel="stylesheet">
+</head>
+<body>
+<div id="app">
+    <!--Hero Logo-->
+    <div style="width: 100%;margin: 32px 0;text-align: center;font-size: 16px;">
+        <p><img src="./images/hero.gif" alt="hero"></p>
+        <p>刀过八荒，剑走六合!</p>
+        <p>一世帝王，枭雄帝王!</p>
+    </div>
+
+    <a-tabs type="card" activeKey="1">
+        <a-tab-pane key="1" tab="Event Trigger Tool" force-render>
+            <!--Event Trigger Tool-->
+            <a-card title="Event Trigger Tool">
+                <a-form
+                        :model="triggerEventForm"
+                        name="triggerEventForm"
+                        :label-col="{ span: 6 }"
+                        :wrapper-col="{ span: 12 }"
+                        autocomplete="off"
+                        @finish="triggerEvent"
+                >
+                    <a-form-item label="Game Role" name="sids">
+                        <a-select v-model:value="triggerEventForm.sids"
+                                  :options="userOptions"
+                                  mode="multiple"
+                                  allow-clear
+                                  list-height="400"
+                                  placeholder="Please select game role"
+                        ></a-select>
+                    </a-form-item>
+
+                    <a-form-item label="Event Name" name="eventName"
+                                 has-feedback
+                                 :rules="[{ required: true, message: 'Please select event name!' }]"
+                    >
+                        <a-select v-model:value="triggerEventForm.eventName"
+                                  placeholder="Please select event name"
+                                  @change="refreshResourceOptions"
+                        >
+                            <a-select-option value="NPCBenefitsEvent">领取每日福利</a-select-option>
+                            <a-select-option value="NPCDungeonEvent">副本</a-select-option>
+                            <a-select-option value="NPCFixedEvent">固定NPC</a-select-option>
+                            <a-select-option value="NPCTimedRefreshEvent">定时刷新NPC(普通怪/书怪/大型BOSS)</a-select-option>
+                            <a-select-option value="OnlyRefreshEvent">在线挂机</a-select-option>
+                        </a-select>
+                    </a-form-item>
+
+                    <a-form-item label="(-1表示无限次)Target Run Round" name="targetRunRound">
+                        <a-input-number v-model:value="triggerEventForm.targetRunRound" :min="-1" precision="0"/>
+                    </a-form-item>
+
+                    <a-form-item label="Resources" name="resources">
+                        <a-select v-model:value="triggerEventForm.resources"
+                                  :options="resourceOptions"
+                                  :mode="resourceSelectMode"
+                                  allow-clear
+                                  list-height="400"
+                                  placeholder="Please select resources"
+                        ></a-select>
+                    </a-form-item>
+
+                    <template v-if="triggerEventForm.eventName == 'NPCTimedRefreshEvent'">
+                        <a-form-item name="isExclude" :wrapper-col="{ offset: 6, span: 12 }">
+                            <a-checkbox v-model:checked="triggerEventForm.isExclude">
+                                {{triggerEventForm.isExclude ? '当前为：排除选中资源' : '当前为：只包含选中资源'}}
+                            </a-checkbox>
+                        </a-form-item>
+
+                        <a-form-item name="Novice" :wrapper-col="{ offset: 6, span: 12 }">
+                            <a-checkbox v-model:checked="triggerEventForm.novice">Enable Novice Protection</a-checkbox>
+                        </a-form-item>
+                    </template>
+
+                    <a-form-item name="isSupplyGrain" :wrapper-col="{ offset: 6, span: 12 }">
+                        <a-checkbox v-model:checked="triggerEventForm.isSupplyGrain">Supply Grain(战斗之前将会供给粮草)
+                        </a-checkbox>
+                    </a-form-item>
+
+                    <a-form-item label="Form Visualization">
+                        <div>{{triggerEventForm}}</div>
+                    </a-form-item>
+
+                    <a-form-item :wrapper-col="{ offset: 6, span: 12 }">
+                        <a-button shape="round" @click="clearTriggerEventForm" style="margin-right: 16px;">Clear Form
+                        </a-button>
+                        </a-button>
+                        <a-button shape="round" type="primary" html-type="submit">Submit</a-button>
+                    </a-form-item>
+                </a-form>
+            </a-card>
+
+            <!--Event Dashboard-->
+            <a-card title="Event Dashboard">
+                <div>
+                    <a-popconfirm
+                            title="Are you sure close all event ?"
+                            ok-text="Yes"
+                            cancel-text="No"
+                            @confirm="closeAll"
+                    >
+                        <a-button shape="round" type="primary" danger style="margin-right: 16px;">Close All</a-button>
+                    </a-popconfirm>
+                    <a-popconfirm
+                            title="Are you sure restart all event ?"
+                            ok-text="Yes"
+                            cancel-text="No"
+                            @confirm="restartAll"
+                    >
+                        <a-button shape="round" style="margin-right: 16px;">Restart All</a-button>
+                    </a-popconfirm>
+                    <a-popconfirm
+                            title="Are you sure pause all event ?"
+                            ok-text="Yes"
+                            cancel-text="No"
+                            @confirm="pauseAll"
+                    >
+                        <a-button shape="round" style="margin-right: 16px;">Pause All</a-button>
+                    </a-popconfirm>
+                    <a-button shape="round" type="primary" @click="refreshEventDashboard">Refresh</a-button>
+                </div>
+                <br>
+                <a-table :data-source="eventDashboardDataSource" :columns="eventDashboardColumns"
+                         :pagination="{pageSize: 20, showTotal: () => 'Total ' + eventDashboardDataSource.length +' items'}"
+                         bordered :scroll="{ x: 1300 }">
+                    <template #status="{ record }">
+                        <a-tag :color="record.status === 'PAUSE' ? 'green' : 'geekblue'">
+                            {{ record.status }}
+                        </a-tag>
+                    </template>
+                    <template #operation="{ record }">
+                        <a-popconfirm
+                                title="Are you sure close this event ?"
+                                ok-text="Yes"
+                                cancel-text="No"
+                                @confirm="close(record.sid)"
+                        >
+                            <a-button shape="round" type="primary" danger style="margin-right: 16px;">Close</a-button>
+                        </a-popconfirm>
+                        <a-popconfirm
+                                title="Are you sure restart this event ?"
+                                ok-text="Yes"
+                                cancel-text="No"
+                                @confirm="restart(record.sid)"
+                        >
+                            <a-button shape="round" style="margin-right: 16px;">Restart</a-button>
+                        </a-popconfirm>
+                        <a-popconfirm
+                                title="Are you sure pause this event ?"
+                                ok-text="Yes"
+                                cancel-text="No"
+                                @confirm="pause(record.sid)"
+                        >
+                            <a-button shape="round">Pause</a-button>
+                        </a-popconfirm>
+                    </template>
+                </a-table>
+            </a-card>
+        </a-tab-pane>
+        <a-tab-pane key="2" tab="Region User Manager" force-render>
+            <!--Region User Manager-->
+            <a-card title="Region User Manager">
+                <a-form
+                        :model="userForm"
+                        name="userForm"
+                        :rules="rules"
+                        :label-col="{ span: 6 }"
+                        :wrapper-col="{ span: 12 }"
+                        autocomplete="off"
+                        @finish="save"
+                >
+                    <a-form-item label="Game Main Page URL" name="gameMainPageUrl"
+                                 has-feedback
+                                 :rules="[{ required: true, message: 'Please input url' }]"
+                    >
+                        <a-input-group compact>
+                            <a-select v-model:value="userForm.scheme" style="width: 90px;">
+                                <a-select-option value="http">http://</a-select-option>
+                                <a-select-option value="https">https://</a-select-option>
+                            </a-select>
+                            <a-input v-model:value="userForm.gameMainPageUrl"
+                                     placeholder="Example: http://111.222.222.111:8080/gCmd.do?cmd=48297&sid=fj4n295nbixxkp19lso99"
+                                     style="width: calc(100% - 90px)"/>
+                        </a-input-group>
+                    </a-form-item>
+
+                    <a-form-item label="Region" name="region">
+                        <a-input v-model:value="userForm.region" placeholder="Please input game region"/>
+                    </a-form-item>
+
+                    <a-form-item label="Role Name" name="roleName">
+                        <a-input v-model:value="userForm.roleName" placeholder="Please input game role name"/>
+                    </a-form-item>
+
+                    <a-form-item label="Form Visualization">
+                        <div>{{userForm}}</div>
+                    </a-form-item>
+
+                    <a-form-item :wrapper-col="{ offset: 6, span: 12 }">
+                        <a-button shape="round" @click="clearUserForm" style="margin-right: 16px;">Clear Form
+                        </a-button>
+                        </a-button>
+                        <a-button shape="round" type="primary" html-type="submit">Submit</a-button>
+                    </a-form-item>
+                </a-form>
+            </a-card>
+            <!--User Dashboard-->
+            <a-card title="User Dashboard">
+                <div>
+                    <a-popconfirm
+                            title="Are you sure delete all user ?"
+                            ok-text="Yes"
+                            cancel-text="No"
+                            @confirm="deleteAll"
+                    >
+                        <a-button shape="round" type="primary" danger style="margin-right: 16px;">Delete All</a-button>
+                    </a-popconfirm>
+                    <a-button shape="round" type="primary" @click="refreshUserDashboard">Refresh</a-button>
+                </div>
+                <br>
+                <a-table :data-source="userDashboardDataSource" :columns="userDashboardColumns"
+                         :pagination="{pageSize: 20, showTotal: () => 'Total ' + userDashboardDataSource.length +' items'}"
+                         bordered :scroll="{ x: 1300 }">
+                    <template #operation="{ record }">
+                        <a-popconfirm
+                                title="Are you sure delete this user ?"
+                                ok-text="Yes"
+                                cancel-text="No"
+                                @confirm="delete0(record.sid)"
+                        >
+                            <a-button shape="round" type="primary" danger>Delete</a-button>
+                        </a-popconfirm>
+                    </template>
+                </a-table>
+            </a-card>
+        </a-tab-pane>
+        <a-tab-pane key="3" tab="Plan List">
+            <!--Plan List-->
+            <a-card title="Plan List">
+                <ul>
+                    <li>use H2 database</li>
+                    <li>com.itplh.hero.domain.Action Pick items 战斗结束后挑选物品</li>
+                </ul>
+            </a-card>
+        </a-tab-pane>
+    </a-tabs>
+
+</div>
+</body>
+
+<script src="js/third/vue/3.2.37/vue.global.prod.min.js"></script>
+<script src="js/third/axios/0.27.2/axios.min.js"></script>
+<script src="js/third/moment.js/2.29.1/moment.min.js"></script>
+<script src="js/third/ant-design-vue/2.2.2/antd.min.js"></script>
+<script src="js/global-variable.js"></script>
+<script src="js/hero-util.js"></script>
+<script src="js/hero-data.js"></script>
+<script src="js/api.js"></script>
+<script src="js/api-event.js"></script>
+<script src="js/api-user.js"></script>
+<script src="js/api-resource.js"></script>
+<script src="js/component-event-manager.js"></script>
+<script src="js/component-user-manager.js"></script>
+<script src="js/index.js"></script>
+</html>
