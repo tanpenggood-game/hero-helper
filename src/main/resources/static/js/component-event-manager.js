@@ -73,6 +73,7 @@ function componentEventManager() {
             res.data.forEach(e => {
                 const event = e['source']
                 const user = event['user']
+                event['openGame'] = gameURL(user)
                 event['key'] = user['sid']
                 event['sid'] = user['sid']
                 event['user'] = showUserName(user)
