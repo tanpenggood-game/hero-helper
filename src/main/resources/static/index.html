@@ -247,13 +247,10 @@
                 </a-table>
             </a-card>
         </a-tab-pane>
-        <a-tab-pane key="3" tab="Plan List">
-            <!--Plan List-->
-            <a-card title="Plan List">
-                <ul>
-                    <li>use H2 database</li>
-                    <li>com.itplh.hero.domain.Action Pick items 战斗结束后挑选物品</li>
-                </ul>
+        <a-tab-pane key="3" tab="Hero Strategy Guide">
+            <!--Hero Strategy Guide-->
+            <a-card title="Hero Strategy Guide">
+                <div v-html="strategyGuide" style="width: 800px;margin: 0 auto;"></div>
             </a-card>
         </a-tab-pane>
     </a-tabs>
@@ -274,5 +271,6 @@
 <script src="js/api-resource.js"></script>
 <script src="js/component-event-manager.js"></script>
 <script src="js/component-user-manager.js"></script>
+<script src="js/component-strategy-guide.js"></script>
 <script src="js/index.js"></script>
 </html>
