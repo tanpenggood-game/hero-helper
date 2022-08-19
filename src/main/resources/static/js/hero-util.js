@@ -54,3 +54,14 @@ function parseURL(url) {
         port,
     }
 }
+
+function gameURL(user) {
+    const arr = []
+    arr.push('//')
+    arr.push(user['domain'])
+    arr.push(':')
+    arr.push(user['port'])
+    arr.push('/gCmd.do?cmd=1&sid=')
+    arr.push(user['sid'])
+    return arr.join('')
+}

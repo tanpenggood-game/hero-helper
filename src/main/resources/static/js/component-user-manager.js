@@ -32,6 +32,7 @@ function componentUserManager() {
             const all = []
             res.data.forEach(user => {
                 user['key'] = user['sid']
+                user['openGame'] = gameURL(user)
                 user['saveTime'] = user['createTime']
                 all.push(user)
             })

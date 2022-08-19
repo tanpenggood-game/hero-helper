@@ -134,6 +134,9 @@
                             {{ record.status }}
                         </a-tag>
                     </template>
+                    <template #open="{ record }">
+                        <a :href="record.openGame" target="_blank">Open Game</a>
+                    </template>
                     <template #operation="{ record }">
                         <a-popconfirm
                                 title="Are you sure close this event ?"
@@ -163,6 +166,7 @@
                 </a-table>
             </a-card>
         </a-tab-pane>
+
         <a-tab-pane key="2" tab="Region User Manager" force-render>
             <!--Region User Manager-->
             <a-card title="Region User Manager">
@@ -227,6 +231,9 @@
                 <a-table :data-source="userDashboardDataSource" :columns="userDashboardColumns"
                          :pagination="{pageSize: 20, showTotal: () => 'Total ' + userDashboardDataSource.length +' items'}"
                          bordered :scroll="{ x: 1300 }">
+                    <template #open="{ record }">
+                        <a :href="record.openGame" target="_blank">Open Game</a>
+                    </template>
                     <template #operation="{ record }">
                         <a-popconfirm
                                 title="Are you sure delete this user ?"
