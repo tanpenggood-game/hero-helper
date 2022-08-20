@@ -197,6 +197,7 @@ public class EventHandleServiceImpl implements EventHandleService {
                 HeroEventContext eventContext = event.eventContext();
                 log.warn("operate 0 times [sid={}] [event={}] [operation={}] [operationObjects={}]",
                         eventContext.getUser().getSid(), eventContext.getEventName(), executableResource.getOperateName(), operationObjects);
+                document = requestReturnGameMainPage(document).orElse(null);
                 break;
             }
             // only operate once and break loop, if fixed resource
