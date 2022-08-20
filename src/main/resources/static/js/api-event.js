@@ -26,6 +26,6 @@ function apiEventClose(sid) {
     return post('/event/close', {sid})
 }
 
-function apiEventTrigger(data = {eventName: null, sid: null, targetRunRound: 1, extendInfo: {}}) {
+function apiEventTrigger(data = {eventName: null, sids: null, targetRunRound: 1, extendInfo: {}}) {
     return post('/event/trigger', {}, data)
 }
