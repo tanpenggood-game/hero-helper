@@ -128,7 +128,7 @@
                 <br>
                 <a-table :data-source="eventDashboardDataSource" :columns="eventDashboardColumns"
                          :pagination="{pageSize: 20, showTotal: () => 'Total ' + eventDashboardDataSource.length +' items'}"
-                         bordered :scroll="{ x: 1300 }">
+                         bordered :scroll="{ x: 1600 }">
                     <template #status="{ record }">
                         <a-tag :color="record.status === 'PAUSE' ? 'green' : 'geekblue'">
                             {{ record.status }}
