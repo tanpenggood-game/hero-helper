@@ -10,6 +10,10 @@ public class SimpleUser {
      */
     private String sid;
     /**
+     * 协议
+     */
+    private String scheme;
+    /**
      * 域名
      */
     private String domain;

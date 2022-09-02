@@ -60,6 +60,7 @@ public class HeroRegionUser {
     public SimpleUser simpleUser() {
         SimpleUser simpleUser = new SimpleUser();
         simpleUser.setSid(sid);
+        simpleUser.setScheme(scheme);
         simpleUser.setDomain(domain);
         simpleUser.setPort(port);
         simpleUser.setRegion(region);
