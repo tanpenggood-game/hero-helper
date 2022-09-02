@@ -1,14 +1,20 @@
 package com.itplh.hero.util;
 
+import com.itplh.hero.constant.ParameterEnum;
+import com.itplh.hero.constant.PickItemEnum;
+import com.itplh.hero.event.AbstractEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import static com.itplh.hero.util.ElementUtil.queryURIByLastALink;
-import static com.itplh.hero.util.ElementUtil.queryURIByLinkName;
 import static com.itplh.hero.util.RequestUtil.requestByLinkName;
 import static com.itplh.hero.util.RequestUtil.sleepThenGETRequest;
 
@@ -18,10 +24,11 @@ public class GameUtil {
     /**
      * 返回游戏主界面
      *
-     * @param document
+     * @param event
      * @return
      */
-    public static Optional<Document> requestReturnGameMainPage(Document document) {
+    public static Optional<Document> requestReturnGameMainPage(AbstractEvent event) {
+        Document document = event.eventContext().currentDocument();
         String operateLog = "robot request-返回游戏";
         if (isGameMainPage(document)) {
             return Optional.ofNullable(document);
@@ -32,15 +39,15 @@ public class GameUtil {
             return Optional.empty();
         }
         // try request return game link
-        boolean hasReturnGameLink = queryURIByLinkName(document, "返回游戏").isPresent();
+        boolean hasReturnGameLink = ElementUtil.queryURILikeLinkName(document, "返回游戏").isPresent();
         if (hasReturnGameLink) {
-            return requestByLinkName(document, "返回游戏", operateLog);
+            return requestByLinkName(event, "返回游戏", operateLog);
         }
         // try request last A link in the page, then continue return game main page
         Optional<String> lastALink = queryURIByLastALink(document);
         if (lastALink.isPresent()) {
-            document = sleepThenGETRequest(lastALink.get(), operateLog);
-            return requestReturnGameMainPage(document);
+            document = sleepThenGETRequest(lastALink.get(), event, operateLog);
+            return requestReturnGameMainPage(event);
         }
         return Optional.ofNullable(document);
     }
@@ -48,52 +55,57 @@ public class GameUtil {
     /**
      * 供给粮草
      *
-     * @param document
+     * @param event
      * @return
      */
-    public static Optional<Document> requestSupplyGrain(Document document) {
+    public static Optional<Document> requestSupplyGrain(AbstractEvent event) {
+        Document document = event.eventContext().currentDocument();
         if (isNotGameMainPage(document)) {
-            document = requestReturnGameMainPage(document).orElse(null);
+            document = requestReturnGameMainPage(event).orElse(null);
         }
         return Optional.ofNullable(document)
-                .flatMap(doc -> requestByLinkName(doc, "武将", "robot request-武将"))
+                .flatMap(doc -> requestByLinkName(event, "武将", "robot request-武将"))
                 .map(doc -> {
-                    while (ElementUtil.queryURIByLinkName(doc, "供给粮草").isPresent()) {
-                        doc = requestByLinkName(doc, "供给粮草", "robot request-供给粮草").orElse(null);
+                    while (ElementUtil.queryURILikeLinkName(doc, "供给粮草").isPresent()) {
+                        doc = requestByLinkName(event, "供给粮草", "robot request-供给粮草").orElse(null);
                     }
                     return doc;
                 })
-                .flatMap(doc -> requestReturnGameMainPage(doc));
+                .flatMap(doc -> requestReturnGameMainPage(event));
     }
 
     /**
-     * 自动战斗
+     * 自动战斗，并返回游戏主页
+     *
+     * 1. custom pick up some item after battle, if necessary
+     * 2. supply grain after battle, if necessary
      *
      * @param document
      * @return
      */
-    public static Optional<Document> requestAutoBattle(Document document) {
+    public static Optional<Document> requestAutoBattleThenReturnGameMainPage(Document document, AbstractEvent event) {
+        // auto battle
         String operateLog = "robot request-自动战斗中";
-        if (isBattlePage(document)) {
-            do {
-                // 默认使用普通攻击，否则使用技能1
-                if (queryURIByLinkName(document, "普通攻击").isPresent()) {
-                    document = queryURIByLinkName(document, "普通攻击")
-                            .map(uri -> sleepThenGETRequest(uri, operateLog))
-                            .orElse(null);
-                } else {
-                    document = ElementUtil.queryURIByFirstALink(document)
-                            .map(uri -> sleepThenGETRequest(uri, operateLog))
-                            .orElse(null);
-                }
-                if (Objects.isNull(document)) {
-                    return Optional.empty();
-                }
-            } while (!isBattleSettlementPage(document));
-            // battle end, return game main page
-            return requestReturnGameMainPage(document);
+        while (isBattlePage(document)) {
+            // 默认使用普通攻击，否则使用技能1
+            if (ElementUtil.queryURILikeLinkName(document, "普通攻击").isPresent()) {
+                document = requestByLinkName(event, "普通攻击", operateLog).orElse(null);
+            } else {
+                document = ElementUtil.queryURIByFirstALink(document)
+                        .map(uri -> sleepThenGETRequest(uri, event, operateLog))
+                        .orElse(null);
+            }
+            if (Objects.isNull(document)) {
+                return Optional.empty();
+            }
         }
-        return Optional.ofNullable(document);
+
+        // custom pick up some item, if necessary
+        pickItemIfNecessary(event);
+        // supply grain, if necessary
+        supplyGrainIfNecessary(event);
+
+        return requestReturnGameMainPage(event);
     }
 
     /**
@@ -103,7 +115,7 @@ public class GameUtil {
      * @return
      */
     public static boolean isGameMainPage(Document document) {
-        return ElementUtil.queryURIByLinkName(document, "游戏首页").isPresent();
+        return ElementUtil.queryURILikeLinkName(document, "游戏首页").isPresent();
     }
 
     public static boolean isNotGameMainPage(Document document) {
@@ -117,7 +129,7 @@ public class GameUtil {
      * @return
      */
     public static boolean isBattlePage(Document document) {
-        return ElementUtil.queryURIByLinkName(document, "快捷键设置").isPresent();
+        return ElementUtil.queryURILikeLinkName(document, "快捷键设置").isPresent();
     }
 
     /**
@@ -140,7 +152,41 @@ public class GameUtil {
      * @return
      */
     public static boolean isOffline(Document document) {
-        return queryURIByLinkName(document, "快速登陆").isPresent();
+        return ElementUtil.queryURILikeLinkName(document, "快速登陆").isPresent();
+    }
+
+    private static Document pickItemIfNecessary(AbstractEvent event) {
+        Document document = event.eventContext().currentDocument();
+        if (!isBattleSettlementPage(document)) {
+            return document;
+        }
+        List<String> customPickItems = event.eventContext()
+                .queryExtendInfo(ParameterEnum.PICK_ITEMS)
+                .map(e -> e.split(","))
+                .map(Arrays::asList)
+                .orElse(Collections.EMPTY_LIST);
+        // merge random items & custom items
+        Collection<String> pickItems = CollectionUtil.merge(PickItemEnum.getRandomPickItems(), customPickItems);
+        if (CollectionUtils.isEmpty(pickItems)) {
+            return document;
+        }
+        for (String pickItem : pickItems) {
+            String operateLog = "robot pick-" + pickItem;
+            if (ElementUtil.queryURILikeLinkName(document, pickItem).isPresent()) {
+                document = requestByLinkName(event, pickItem, operateLog).orElse(null);
+            }
+        }
+        return document;
+    }
+
+    private static Document supplyGrainIfNecessary(AbstractEvent event) {
+        Document document = event.eventContext().currentDocument();
+        boolean isSupplyGrain = event.eventContext().queryExtendInfo(ParameterEnum.SUPPLY_GRAIN).map(Boolean::valueOf)
+                .orElse(false);
+        if (isSupplyGrain) {
+            document = requestSupplyGrain(event).orElse(null);
+        }
+        return document;
     }
 
 }
