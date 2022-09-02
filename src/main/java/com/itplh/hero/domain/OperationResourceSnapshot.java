@@ -1,6 +1,8 @@
 package com.itplh.hero.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.jsoup.nodes.Document;
 
 import java.time.LocalDateTime;
 
@@ -19,6 +21,11 @@ public class OperationResourceSnapshot {
      * mapping {@link OperationResource#getLastRunTime()}
      */
     private LocalDateTime lastRunTime;
+    /**
+     * 当前网页
+     */
+    @JsonIgnore
+    private Document currentDocument;
 
     public OperationResourceSnapshot(String operateName, LocalDateTime lastRunTime) {
         this.operateName = operateName;

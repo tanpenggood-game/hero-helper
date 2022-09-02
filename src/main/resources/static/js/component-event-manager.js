@@ -4,6 +4,7 @@ function componentEventManager() {
     const resourceSelectMode = ref('multiple')
     const userOptions = ref(globalUserOptions)
     const eventDashboardDataSource = ref([])
+    const pickItemOptions = ref([])
 
     const clearTriggerEventForm = () => {
         triggerEventForm.value = {...defaultTriggerEventForm}
@@ -32,6 +33,9 @@ function componentEventManager() {
         if (Array.isArray(form['resources'])) {
             data['extendInfo']['resources'] = form['resources'].join(',')
         }
+        if (Array.isArray(form['pickItems'])) {
+            data['extendInfo']['pickItems'] = form['pickItems'].join(',')
+        }
         // request api
         apiSimpleHelper(apiEventTrigger(data), res => {
             clearTriggerEventForm()
@@ -39,14 +43,23 @@ function componentEventManager() {
         })
     }
 
-    const refreshResourceOptions = (eventName) => apiResourceGet(eventName)
-        .then(({data: res}) => {
-            resourceOptions.value = res.data
+    const refreshOptions = (eventName) => Promise.all([
+        apiResourceGet(eventName),
+        apiResourcePickItems(eventName)])
+        .then(allResponse => {
+            const {data: resourceRes} = allResponse[0]
+            const {data: pickItemsRes} = allResponse[1]
+            if (resourceRes.success) {
+                resourceOptions.value = resourceRes.data
 
-            const form = triggerEventForm.value
-            resourceSelectMode.value = form['eventName'] === 'NPCFixedEvent' ? 'combobox' : 'multiple'
-            if (form['resources']) {
-                form['resources'] = undefined
+                const form = triggerEventForm.value
+                resourceSelectMode.value = form['eventName'] === 'NPCFixedEvent' ? 'combobox' : 'multiple'
+                if (form['resources']) {
+                    form['resources'] = undefined
+                }
+            }
+            if (pickItemsRes.success) {
+                pickItemOptions.value = pickItemsRes.data
             }
         })
 
@@ -106,9 +119,10 @@ function componentEventManager() {
         clearTriggerEventForm,
         triggerEvent,
         resourceOptions,
-        refreshResourceOptions,
+        refreshOptions,
         resourceSelectMode,
         userOptions,
+        pickItemOptions,
 
         eventDashboardDataSource,
         eventDashboardColumns: eventDashboardColumns(),
@@ -119,6 +133,12 @@ function componentEventManager() {
         restart,
         closeAll,
         close,
+
+        showAdvancedOptions: (eventName) => [
+            'NPCDungeonEvent',
+            'NPCFixedEvent',
+            'NPCTimedRefreshEvent',
+        ].includes(eventName)
     }
 }
 

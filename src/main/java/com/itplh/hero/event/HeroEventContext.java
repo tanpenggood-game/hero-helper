@@ -7,6 +7,7 @@ import com.itplh.hero.domain.OperationResourceSnapshot;
 import com.itplh.hero.domain.SimpleUser;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.jsoup.nodes.Document;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -75,17 +76,24 @@ public class HeroEventContext {
         return new HeroEventContext(user, eventName, targetRunRound, extendInfo);
     }
 
-    public String buildURI(String sid) {
-        return "/gCmd.do?cmd=1&sid=" + sid;
-    }
-
     public String buildURI() {
-        return buildURI(user.getSid());
+        Assert.notNull(user, "user is required.");
+        return "/gCmd.do?cmd=1&sid=" + user.getSid();
     }
 
     public Optional<String> queryExtendInfo(ParameterEnum parameter) {
         String value = extendInfo.get(parameter.getName());
         return StringUtils.hasText(value) ? Optional.ofNullable(value) : Optional.empty();
+    }
+
+    public Document currentDocument() {
+        Assert.notNull(currentOperationResource, "currentOperationResource is null.");
+        return currentOperationResource.getCurrentDocument();
+    }
+
+    public void realTimeUpdateDocument(Document document) {
+        Assert.notNull(currentOperationResource, "currentOperationResource is null.");
+        currentOperationResource.setCurrentDocument(document);
     }
 
 }

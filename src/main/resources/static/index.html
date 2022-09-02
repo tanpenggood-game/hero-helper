@@ -44,7 +44,7 @@
                     >
                         <a-select v-model:value="triggerEventForm.eventName"
                                   placeholder="Please select event name"
-                                  @change="refreshResourceOptions"
+                                  @change="refreshOptions"
                         >
                             <a-select-option value="NPCBenefitsEvent">领取每日福利</a-select-option>
                             <a-select-option value="NPCDungeonEvent">副本</a-select-option>
@@ -68,7 +68,17 @@
                         ></a-select>
                     </a-form-item>
 
-                    <template v-if="triggerEventForm.eventName == 'NPCTimedRefreshEvent'">
+                    <template v-if="showAdvancedOptions(triggerEventForm.eventName)">
+                        <a-form-item label="Custom Pick Items" name="pickItems">
+                            <a-select v-model:value="triggerEventForm.pickItems"
+                                      :options="pickItemOptions"
+                                      mode="multiple"
+                                      allow-clear
+                                      list-height="400"
+                                      placeholder="Please select custom pick item"
+                            ></a-select>
+                        </a-form-item>
+
                         <a-form-item name="isExclude" :wrapper-col="{ offset: 6, span: 12 }">
                             <a-checkbox v-model:checked="triggerEventForm.isExclude">
                                 {{triggerEventForm.isExclude ? '当前为：排除选中资源' : '当前为：只包含选中资源'}}
@@ -78,12 +88,12 @@
                         <a-form-item name="Novice" :wrapper-col="{ offset: 6, span: 12 }">
                             <a-checkbox v-model:checked="triggerEventForm.novice">Enable Novice Protection</a-checkbox>
                         </a-form-item>
-                    </template>
 
-                    <a-form-item name="isSupplyGrain" :wrapper-col="{ offset: 6, span: 12 }">
-                        <a-checkbox v-model:checked="triggerEventForm.isSupplyGrain">Supply Grain(战斗之前将会供给粮草)
-                        </a-checkbox>
-                    </a-form-item>
+                        <a-form-item name="isSupplyGrain" :wrapper-col="{ offset: 6, span: 12 }">
+                            <a-checkbox v-model:checked="triggerEventForm.isSupplyGrain">Supply Grain(每次战斗结束后供给粮草)
+                            </a-checkbox>
+                        </a-form-item>
+                    </template>
 
                     <a-form-item label="Form Visualization">
                         <div>{{triggerEventForm}}</div>

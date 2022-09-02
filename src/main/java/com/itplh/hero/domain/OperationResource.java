@@ -28,14 +28,6 @@ public class OperationResource {
      */
     private long refreshFrequency;
     /**
-     * 次数限制
-     * <p>
-     * 默认值为-1，表示不限制次数
-     * recommend set limit, if resource is dungeon
-     * TODO 实现次数限制
-     */
-    private int limit = -1;
-    /**
      * 优先级
      * <p>
      * 值越大，越优先操作
@@ -66,7 +58,7 @@ public class OperationResource {
     private LocalDateTime lastRunTime;
 
     public boolean isFixedResource() {
-        return refreshFrequency <= 0L && limit == -1;
+        return refreshFrequency <= 0L;
     }
 
     /**

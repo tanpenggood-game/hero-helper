@@ -1,0 +1,39 @@
+npc:
+  dungeon:
+    mapping:
+      zhen-bing:
+        operate-name: 攻击祝家兵阵
+        enable-novice-protection: true
+        global-operation-objects:
+          - 小天兵
+          - 大天兵
+          - 小地兵
+          - 大地兵
+          - 小人兵
+          - 大人兵
+          - 小和兵
+          - 大和兵
+        actions:
+          # Reset to (1,1)
+          - direction: LEFT
+            repeat-times: 5
+          - direction: DOWN
+            repeat-times: 5
+          # Starting at (1,1)
+          - direction: RIGHT
+            repeat-times: 5
+          - direction: UP
+          - direction: LEFT
+            repeat-times: 5
+          - direction: UP
+          - direction: RIGHT
+            repeat-times: 5
+          - direction: UP
+          - direction: LEFT
+            repeat-times: 5
+          - direction: UP
+          - direction: RIGHT
+            repeat-times: 5
+          - direction: UP
+          - direction: LEFT
+            repeat-times: 5
