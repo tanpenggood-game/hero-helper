@@ -1,5 +1,6 @@
 package com.itplh.hero.controller;
 
+import com.itplh.hero.constant.PickItemEnum;
 import com.itplh.hero.domain.Option;
 import com.itplh.hero.domain.OptionGroup;
 import com.itplh.hero.util.EventTemplateUtil;
@@ -9,8 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/resource")
@@ -51,6 +54,23 @@ public class ResourceController {
         addIfNotEmpty(groupOptions, bossList, "Boss");
         addIfNotEmpty(groupOptions, resourceExchangeList, "Resource exchange");
         addIfNotEmpty(groupOptions, otherList, "Other");
+
+        return Result.ok(groupOptions);
+    }
+
+    @GetMapping("/pick-items")
+    public Result<List<OptionGroup>> pickItems(String eventName) {
+        List<OptionGroup> groupOptions = new ArrayList<>();
+        EventTemplateUtil.getEventClass(eventName).ifPresent(eventClass -> {
+            Map<String, Collection<Option>> pickOptionMap = PickItemEnum.getPickOptionMap(eventClass);
+            for (Map.Entry<String, Collection<Option>> entry : pickOptionMap.entrySet()) {
+                String group = entry.getKey();
+                Collection<Option> options = entry.getValue();
+                if (!CollectionUtils.isEmpty(options)) {
+                    groupOptions.add(new OptionGroup(group, options));
+                }
+            }
+        });
 
         return Result.ok(groupOptions);
     }
