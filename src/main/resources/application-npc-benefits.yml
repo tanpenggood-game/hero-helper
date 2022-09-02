@@ -8,16 +8,6 @@ npc:
         actions:
           - operation-steps: 开启今日修神
 
-      benefits-exchange-online-time:
-        operate-name: 在线时间兑换
-        start-position: 北大街
-        global-operation-objects: 活动大使
-        actions:
-          - operation-steps: 在线时间x15兑换万虫羹x1
-          - operation-steps: 在线时间x30兑换高级万虫羹x1
-          - operation-steps: 在线时间x30兑换万虫羹x1(151级)
-          - operation-steps: 在线时间x45兑换高级万虫羹x1(151级)
-
       benefits-broken-dream-crystal:
         operate-name: 领取每日破碎梦晶石(151级)
         start-position: 史家庄
@@ -42,3 +32,23 @@ npc:
             operation-steps:
               - 白金VIP
               - 领取奖励
+
+      benefits-water-moon-mirror:
+        operate-name: 领取水月镜(180级以上)
+        start-position: 上梁山
+        actions:
+          - direction: UP
+            has-callback: false
+          - direction: UP
+            operation-objects: 水月堂主
+            operation-steps: 领取水月镜
+
+      benefits-exchange-online-time:
+        operate-name: 在线时间兑换
+        start-position: 北大街
+        global-operation-objects: 活动大使
+        actions:
+          - operation-steps: 在线时间x15兑换万虫羹x1
+          - operation-steps: 在线时间x30兑换高级万虫羹x1
+          - operation-steps: 在线时间x30兑换万虫羹x1(151级)
+          - operation-steps: 在线时间x45兑换高级万虫羹x1(151级)
