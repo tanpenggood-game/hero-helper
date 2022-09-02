@@ -1,6 +1,5 @@
 package com.itplh.hero.service.impl;
 
-import com.itplh.hero.constant.ParameterEnum;
 import com.itplh.hero.domain.Action;
 import com.itplh.hero.domain.OperationResource;
 import com.itplh.hero.domain.OperationResourceSnapshot;
@@ -12,6 +11,7 @@ import com.itplh.hero.listener.EventBus;
 import com.itplh.hero.service.EventHandleService;
 import com.itplh.hero.service.HeroRegionUserService;
 import com.itplh.hero.util.CollectionUtil;
+import com.itplh.hero.util.ElementUtil;
 import com.itplh.hero.util.GameUtil;
 import com.itplh.hero.util.MoveUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +25,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.itplh.hero.util.CollectionUtil.getLog;
-import static com.itplh.hero.util.ElementUtil.queryURIByLinkName;
-import static com.itplh.hero.util.GameUtil.*;
+import static com.itplh.hero.util.GameUtil.isOffline;
+import static com.itplh.hero.util.GameUtil.requestAutoBattleThenReturnGameMainPage;
+import static com.itplh.hero.util.GameUtil.requestReturnGameMainPage;
 import static com.itplh.hero.util.Go1000mUtil.go1000m;
 import static com.itplh.hero.util.RequestUtil.requestByLinkName;
 import static com.itplh.hero.util.RequestUtil.sleepThenGETRequest;
@@ -95,7 +96,7 @@ public class EventHandleServiceImpl implements EventHandleService {
         OperationResourceSnapshot currentOperationResource = new OperationResourceSnapshot(operateName, executableResource.getLastRunTime());
         event.eventContext().setCurrentOperationResource(currentOperationResource);
         // 1. request uri
-        Document document = sleepThenGETRequest(event.eventContext().buildURI(),
+        Document document = sleepThenGETRequest(event.eventContext().buildURI(), event,
                 "start " + executableResource.getOperateName());
         //  delete user & close event, if user already offline
         if (isOffline(document)) {
@@ -105,21 +106,19 @@ public class EventHandleServiceImpl implements EventHandleService {
                     sid, eventName, operateName, isClosed, isDelete);
             return Optional.empty();
         }
-        // don't return game main page, if event is OnlyRefreshEvent
+        // if event is OnlyRefreshEvent
         if (event instanceof OnlyRefreshEvent) {
             log.info("only refresh event [sid={}] [eventName={}] [operateName={}]]", sid, eventName, operateName);
             return Optional.ofNullable(document);
         }
         // 2. revise to target position
-        document = go1000m(document, executableResource.getStartPosition()).orElse(null);
-        // supply grain if necessary
-        document = supplyGrainIfNecessary(event, document);
+        document = go1000m(event, executableResource.getStartPosition()).orElse(null);
         // set run time, second times ensure start run time more accuracy
         executableResource.setLastRunTime(LocalDateTime.now());
         // 3. execute action
         document = executeActions(document, event, executableResource);
         // 4. return game main page
-        return requestReturnGameMainPage(document);
+        return requestReturnGameMainPage(event);
     }
 
     private Document executeActions(Document document,
@@ -141,7 +140,7 @@ public class EventHandleServiceImpl implements EventHandleService {
             }
             // request move 1 step, if necessary
             if (Optional.ofNullable(action.getDirection()).isPresent()) {
-                document = MoveUtil.move(document, action.getDirection()).orElse(null);
+                document = MoveUtil.move(event, action.getDirection()).orElse(null);
             }
             // execute action callback
             document = executeActionCallback(document, action, executableResource, event);
@@ -164,58 +163,42 @@ public class EventHandleServiceImpl implements EventHandleService {
         }
         // if first is battle page
         if (GameUtil.isBattlePage(document)) {
-            document = requestAutoBattle(document).orElse(null);
+            document = requestAutoBattleThenReturnGameMainPage(document, event).orElse(null);
         }
-        // action handle, includes operation objects and steps
-        return actionCallbackHandler(document, action, executableResource, event);
-    }
 
-    private Document actionCallbackHandler(Document document,
-                                           Action action,
-                                           OperationResource executableResource,
-                                           AbstractEvent event) {
         Collection<String> operationObjects = CollectionUtil.merge(executableResource.getGlobalOperationObjects(), action.getOperationObjects());
         Collection<String> operationSteps = CollectionUtil.merge(executableResource.getGlobalOperationSteps(), action.getOperationSteps());
-        while (queryURIByLinkName(document, operationObjects).isPresent()) {
+        while (ElementUtil.queryURILikeLinkName(document, operationObjects).isPresent()) {
             // request operation object
-            document = requestByLinkName(document, operationObjects, getLog(operationObjects)).orElse(null);
+            document = requestByLinkName(event, operationObjects, getLog(operationObjects)).orElse(null);
             int operateTimes = 0;
             // operation steps, if exists
             for (String step : operationSteps) {
-                if (queryURIByLinkName(document, step).isPresent()) {
+                if (ElementUtil.queryURILikeLinkName(document, step).isPresent()) {
                     ++operateTimes;
-                    document = requestByLinkName(document, step, getLog(Arrays.asList(step))).orElse(null);
+                    document = requestByLinkName(event, step, getLog(Arrays.asList(step))).orElse(null);
                 }
             }
             // attack operation object, if necessary
             if (GameUtil.isBattlePage(document)) {
                 ++operateTimes;
-                document = requestAutoBattle(document).orElse(null);
+                document = requestAutoBattleThenReturnGameMainPage(document, event).orElse(null);
             }
             // break loop, if operate 0 times
             if (operateTimes == 0) {
                 HeroEventContext eventContext = event.eventContext();
                 log.warn("operate 0 times [sid={}] [event={}] [operation={}] [operationObjects={}]",
                         eventContext.getUser().getSid(), eventContext.getEventName(), executableResource.getOperateName(), operationObjects);
-                document = requestReturnGameMainPage(document).orElse(null);
+                document = requestReturnGameMainPage(event).orElse(null);
                 break;
             }
             // only operate once and break loop, if fixed resource
             if (executableResource.isFixedResource()) {
-                document = requestReturnGameMainPage(document).orElse(null);
+                document = requestReturnGameMainPage(event).orElse(null);
                 break;
             }
         }
-        return document;
-    }
 
-    private Document supplyGrainIfNecessary(AbstractEvent event, Document document) {
-        boolean isSupplyGrain = event.eventContext().queryExtendInfo(ParameterEnum.SUPPLY_GRAIN)
-                .map(Boolean::valueOf)
-                .orElse(false);
-        if (isSupplyGrain) {
-            document = GameUtil.requestSupplyGrain(document).orElse(null);
-        }
         return document;
     }
 
