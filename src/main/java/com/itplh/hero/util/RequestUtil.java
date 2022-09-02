@@ -1,8 +1,7 @@
 package com.itplh.hero.util;
 
-import com.itplh.hero.component.BeanUtil;
-import com.itplh.hero.domain.HeroRegionUser;
-import com.itplh.hero.service.HeroRegionUserService;
+import com.itplh.hero.domain.SimpleUser;
+import com.itplh.hero.event.AbstractEvent;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
@@ -35,28 +34,29 @@ public class RequestUtil {
      * 2.请求失败会重试
      *
      * @param uri
+     * @param event
      * @param operateLog
      * @return
      */
-    public static Document sleepThenGETRequest(String uri, String operateLog) {
-        return sleepThenRequestPlus(RequestHelper.get(uri, operateLog),
+    public static Document sleepThenGETRequest(String uri, AbstractEvent event, String operateLog) {
+        Document document = sleepThenRequestPlus(RequestHelper.get(uri, event, operateLog),
                 (requestHelper) -> request(requestHelper));
+        // real time update current document
+        event.eventContext().realTimeUpdateDocument(document);
+        return document;
     }
 
-    public static Optional<Document> requestByLinkName(Document document, Collection<String> linkNames, String operateLog) {
-        return ElementUtil.queryURIByLinkName(document, linkNames)
-                .map(uri -> sleepThenGETRequest(uri, operateLog));
+    public static Optional<Document> requestByLinkName(AbstractEvent event,
+                                                       Collection<String> linkNames,
+                                                       String operateLog) {
+        return ElementUtil.queryURILikeLinkName(event.eventContext().currentDocument(), linkNames)
+                .map(uri -> sleepThenGETRequest(uri, event, operateLog));
     }
 
-    public static Optional<Document> requestByLinkName(Document document, String linkName, String operateLog) {
-        return requestByLinkName(document, Arrays.asList(linkName), operateLog);
-    }
-
-    public static Optional<Document> requestByAccesskey(Document document,
-                                                        String accessValue,
-                                                        String operateLog) {
-        return ElementUtil.queryURIByAccesskey(document, accessValue)
-                .map(uri -> sleepThenGETRequest(uri, operateLog));
+    public static Optional<Document> requestByLinkName(AbstractEvent event,
+                                                       String linkName,
+                                                       String operateLog) {
+        return requestByLinkName(event, Arrays.asList(linkName), operateLog);
     }
 
     private static Document request(RequestHelper requestHelper) {
@@ -110,33 +110,15 @@ public class RequestUtil {
         String scheme = requestHelper.getScheme();
         String domain = requestHelper.getDomain();
         int port = requestHelper.getPort();
-        String url = scheme + "://" + domain + ":" + port;
+        String completeDomain = scheme + "://" + domain + ":" + port;
 
-        String defaultURI = "/gCmd.do?cmd=1&sid=sn0a8a5mgdrn051klfvh4j";
-        if (StringUtils.hasText(requestHelper.getURI())) {
-            String p = requestHelper.getURI().startsWith("/") ? "" : "/";
-            defaultURI = p + requestHelper.getURI();
-        }
-        return url + defaultURI;
-    }
-
-    private static Map<String, String> parseURIParameters(String uri) {
-        HashMap<String, String> parameterMap = new HashMap<>();
-
-        int parameterStartIndex = uri.lastIndexOf("?") + 1;
-        String parameters = uri.substring(parameterStartIndex);
-        for (String parameterPair : parameters.split("&")) {
-            String[] parameter = parameterPair.split("=");
-            if (parameter.length == 2) {
-                parameterMap.put(parameter[0], parameter[1]);
-            }
+        String uri = requestHelper.getURI();
+        if (StringUtils.hasText(uri)) {
+            String p = uri.startsWith("/") ? "" : "/";
+            uri = p + uri;
         }
 
-        return parameterMap;
-    }
-
-    private static String parseSid(String uri) {
-        return parseURIParameters(uri).get("sid");
+        return completeDomain + uri;
     }
 
     @Data
@@ -153,27 +135,27 @@ public class RequestUtil {
         private int port;
         private String operateLog;
 
-        private RequestHelper(String uri, String operateLog) {
+        private RequestHelper(String uri, AbstractEvent event, String operateLog) {
             Assert.hasText(uri, "uri is required.");
-            HeroRegionUserService heroRegionUserService = BeanUtil.getBean(HeroRegionUserService.class);
-            Optional<HeroRegionUser> regionUserOptional = heroRegionUserService.get(parseSid(uri));
-            Assert.isTrue(regionUserOptional.isPresent(), "sid is invalid.");
-
             this.URI = uri;
+
+            SimpleUser user = event.eventContext().getUser();
+            this.scheme = user.getScheme();
+            this.domain = user.getDomain();
+            this.port = user.getPort();
+
             this.operateLog = operateLog;
-            regionUserOptional.ifPresent(heroRegionUser -> {
-                this.scheme = heroRegionUser.getScheme();
-                this.domain = heroRegionUser.getDomain();
-                this.port = heroRegionUser.getPort();
-            });
         }
 
-        public static RequestHelper get(String uri, String operateLog) {
-            return new RequestHelper(uri, operateLog).setMethod(Connection.Method.GET);
+        public static RequestHelper get(String uri, AbstractEvent event, String operateLog) {
+            return new RequestHelper(uri, event, operateLog).setMethod(Connection.Method.GET);
         }
 
-        public static RequestHelper post(String uri, Map<String, String> data, String operateLog) {
-            return new RequestHelper(uri, operateLog).setData(data).setMethod(Connection.Method.POST);
+        public static RequestHelper post(String uri,
+                                         AbstractEvent event,
+                                         Map<String, String> data,
+                                         String operateLog) {
+            return new RequestHelper(uri, event, operateLog).setData(data).setMethod(Connection.Method.POST);
         }
 
     }
