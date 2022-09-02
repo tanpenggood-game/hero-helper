@@ -14,6 +14,10 @@ public enum ParameterEnum {
      */
     EXCLUDE("isExclude"),
     /**
+     * pickItems, used to custom pick item after battle
+     */
+    PICK_ITEMS("pickItems"),
+    /**
      * novice, set value as true, will enable novice protection when operation resource
      */
     NOVICE("novice"),
