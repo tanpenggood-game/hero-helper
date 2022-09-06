@@ -53,30 +53,8 @@ public class GameUtil {
     }
 
     /**
-     * 供给粮草
-     *
-     * @param event
-     * @return
-     */
-    public static Optional<Document> requestSupplyGrain(AbstractEvent event) {
-        Document document = event.eventContext().currentDocument();
-        if (isNotGameMainPage(document)) {
-            document = requestReturnGameMainPage(event).orElse(null);
-        }
-        return Optional.ofNullable(document)
-                .flatMap(doc -> requestByLinkName(event, "武将", "robot request-武将"))
-                .map(doc -> {
-                    while (ElementUtil.queryURILikeLinkName(doc, "供给粮草").isPresent()) {
-                        doc = requestByLinkName(event, "供给粮草", "robot request-供给粮草").orElse(null);
-                    }
-                    return doc;
-                })
-                .flatMap(doc -> requestReturnGameMainPage(event));
-    }
-
-    /**
      * 自动战斗，并返回游戏主页
-     *
+     * <p>
      * 1. custom pick up some item after battle, if necessary
      * 2. supply grain after battle, if necessary
      *
@@ -103,7 +81,7 @@ public class GameUtil {
         // custom pick up some item, if necessary
         pickItemIfNecessary(event);
         // supply grain, if necessary
-        supplyGrainIfNecessary(event);
+        requestSupplyGrainIfNecessary(event);
 
         return requestReturnGameMainPage(event);
     }
@@ -155,6 +133,38 @@ public class GameUtil {
         return ElementUtil.queryURILikeLinkName(document, "快速登陆").isPresent();
     }
 
+    public static Document requestSupplyGrainIfNecessary(AbstractEvent event) {
+        Document document = event.eventContext().currentDocument();
+        boolean isSupplyGrain = event.eventContext().queryExtendInfo(ParameterEnum.SUPPLY_GRAIN).map(Boolean::valueOf)
+                .orElse(false);
+        if (isSupplyGrain) {
+            document = requestSupplyGrain(event).orElse(null);
+        }
+        return document;
+    }
+
+    /**
+     * 供给粮草
+     *
+     * @param event
+     * @return
+     */
+    private static Optional<Document> requestSupplyGrain(AbstractEvent event) {
+        Document document = event.eventContext().currentDocument();
+        if (isNotGameMainPage(document)) {
+            document = requestReturnGameMainPage(event).orElse(null);
+        }
+        return Optional.ofNullable(document)
+                .flatMap(doc -> requestByLinkName(event, "武将", "robot request-武将"))
+                .map(doc -> {
+                    while (ElementUtil.queryURILikeLinkName(doc, "供给粮草").isPresent()) {
+                        doc = requestByLinkName(event, "供给粮草", "robot request-供给粮草").orElse(null);
+                    }
+                    return doc;
+                })
+                .flatMap(doc -> requestReturnGameMainPage(event));
+    }
+
     private static Document pickItemIfNecessary(AbstractEvent event) {
         Document document = event.eventContext().currentDocument();
         if (!isBattleSettlementPage(document)) {
@@ -175,16 +185,6 @@ public class GameUtil {
             if (ElementUtil.queryURILikeLinkName(document, pickItem).isPresent()) {
                 document = requestByLinkName(event, pickItem, operateLog).orElse(null);
             }
-        }
-        return document;
-    }
-
-    private static Document supplyGrainIfNecessary(AbstractEvent event) {
-        Document document = event.eventContext().currentDocument();
-        boolean isSupplyGrain = event.eventContext().queryExtendInfo(ParameterEnum.SUPPLY_GRAIN).map(Boolean::valueOf)
-                .orElse(false);
-        if (isSupplyGrain) {
-            document = requestSupplyGrain(event).orElse(null);
         }
         return document;
     }
