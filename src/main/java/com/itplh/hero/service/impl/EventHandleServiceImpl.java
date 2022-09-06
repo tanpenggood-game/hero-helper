@@ -21,13 +21,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.itplh.hero.util.CollectionUtil.getLog;
 import static com.itplh.hero.util.GameUtil.isOffline;
 import static com.itplh.hero.util.GameUtil.requestAutoBattleThenReturnGameMainPage;
 import static com.itplh.hero.util.GameUtil.requestReturnGameMainPage;
+import static com.itplh.hero.util.GameUtil.requestSupplyGrainIfNecessary;
 import static com.itplh.hero.util.Go1000mUtil.go1000m;
 import static com.itplh.hero.util.RequestUtil.requestByLinkName;
 import static com.itplh.hero.util.RequestUtil.sleepThenGETRequest;
@@ -113,6 +118,8 @@ public class EventHandleServiceImpl implements EventHandleService {
         }
         // 2. revise to target position
         document = go1000m(event, executableResource.getStartPosition()).orElse(null);
+        // supply grain if necessary
+        document = requestSupplyGrainIfNecessary(event);
         // set run time, second times ensure start run time more accuracy
         executableResource.setLastRunTime(LocalDateTime.now());
         // 3. execute action
