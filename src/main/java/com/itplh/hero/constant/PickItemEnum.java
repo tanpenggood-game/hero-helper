@@ -24,6 +24,7 @@ public enum PickItemEnum {
     蛇筋(NPCFixedEvent.class, "Fixed", "巨蛇-蛇筋", "蛇筋"),
     牛皮(NPCFixedEvent.class, "Fixed", "老黄牛-牛皮", "牛皮"),
     钥匙(NPCFixedEvent.class, "Fixed", "宝库守卫-钥匙", "钥匙"),
+    变异菜青虫毒液(NPCFixedEvent.class, "Fixed", "变异菜青虫毒液", "变异菜青虫毒液"),
 
     蜂刺(NPCTimedRefreshEvent.class, "Monster group", "桃花阵-蜂刺", "蜂刺"),
     流花河地图(NPCTimedRefreshEvent.class, "Monster group", "流花河-流花河地图", "流花河地图"),
