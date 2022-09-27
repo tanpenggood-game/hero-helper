@@ -45,7 +45,7 @@ npc:
               - 返回游方和尚
 
       exchange-resources-100-50:
-        operate-name: 潜能转资源(100:50)
+        operate-name: 潜能转资源(1000万:500万)
         start-position: 寒玉狮前厅
         global-operation-objects: 灵隐和尚
         actions:
@@ -63,7 +63,7 @@ npc:
               - 4潜能转化为石料(1000万:500万)
 
       exchange-resources-100-100:
-        operate-name: 潜能转资源(100:100)
+        operate-name: 潜能转资源(5000万:5000万)
         start-position: 寒玉狮前厅
         global-operation-objects: 灵隐和尚
         actions:
