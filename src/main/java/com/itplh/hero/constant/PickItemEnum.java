@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 @Getter
 public enum PickItemEnum {
 
+    青蛇皮(NPCFixedEvent.class, "Fixed", "青蛇-青蛇皮", "青蛇皮"),
     蛇筋(NPCFixedEvent.class, "Fixed", "巨蛇-蛇筋", "蛇筋"),
     牛皮(NPCFixedEvent.class, "Fixed", "老黄牛-牛皮", "牛皮"),
     钥匙(NPCFixedEvent.class, "Fixed", "宝库守卫-钥匙", "钥匙"),
@@ -37,6 +38,7 @@ public enum PickItemEnum {
     蟒蛇胆(NPCTimedRefreshEvent.class, "Monster group", "绿竹林-蟒蛇胆", "蟒蛇胆"),
     电光虾皮(NPCTimedRefreshEvent.class, "Monster group", "幽暗池-电光虾皮", "电光虾皮"),
     电光鱼鳞(NPCTimedRefreshEvent.class, "Monster group", "幽暗池-电光鱼鳞", "电光鱼鳞"),
+    美女图谱(NPCTimedRefreshEvent.class, "Monster group", "幽暗池-美女图谱", "美女图谱"),
 
     青蛇胆(NPCTimedRefreshEvent.class, "Boss", "树洞-青蛇胆", "青蛇胆"),
     蜂王浆(NPCTimedRefreshEvent.class, "Boss", "桃花山-蜂王浆", "蜂王浆"),
